@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0F6E5E">
+<title>Attendance Record</title>
+<style>
+  :root{
+    --paper:#FAFAF7;
+    --card:#FFFFFF;
+    --ink:#1C2B33;
+    --muted:#647178;
+    --line:#D7DEDD;
+    --line-strong:#B7C2C1;
+    --accent:#0F6E5E;
+    --accent-ink:#0A4A3F;
+    --accent-soft:#E4F1EE;
+    --warn:#B23A3A;
+    --warn-soft:#F6E7E6;
+    --radius:14px;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", ui-serif, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Menlo", monospace;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased;}
+  body{padding-bottom:96px;}
+  ::selection{background:var(--accent-soft);}
+
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:rgba(250,250,247,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom:1px solid var(--line);
+    padding: calc(env(safe-area-inset-top) + 14px) 18px 12px;
+  }
+  .topbar-row{display:flex; align-items:baseline; justify-content:space-between; gap:10px;}
+  .mark{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--serif); font-size:19px; font-weight:700; letter-spacing:0.01em;
+  }
+  .mark .dot{width:9px; height:9px; border-radius:50%; background:var(--accent); display:inline-block; box-shadow:0 0 0 3px var(--accent-soft);}
+  .eyebrow{font-family:var(--mono); font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted);}
+  .progress-wrap{margin-top:10px;}
+  .progress-track{height:5px; background:var(--line); border-radius:4px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--accent); border-radius:4px; transition:width .35s ease;}
+  .progress-label{font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:6px; display:flex; justify-content:space-between;}
+
+  .wrap{max-width:640px; margin:0 auto; padding:18px;}
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px; margin-bottom:16px;
+  }
+  .card h2{
+    font-family:var(--serif); font-size:15px; margin:0 0 3px; font-weight:700;
+  }
+  .card .sub{font-size:12.5px; color:var(--muted); margin:0 0 14px; line-height:1.5;}
+
+  label.field{display:block; margin-bottom:14px;}
+  label.field:last-child{margin-bottom:0;}
+  .field-label{
+    display:block; font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:6px;
+  }
+  input[type=text], input[type=date], input[type=number]{
+    width:100%; padding:11px 12px; font-size:16px; font-family:var(--sans);
+    border:1px solid var(--line-strong); border-radius:9px; background:#fff; color:var(--ink);
+    appearance:none; -webkit-appearance:none;
+  }
+  input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);}
+  .row2{display:grid; grid-template-columns:1fr 110px; gap:10px;}
+
+  .weeks{margin-top:4px;}
+  .week{
+    border:1px solid var(--line); border-radius:var(--radius); background:var(--card);
+    margin-bottom:12px; overflow:hidden;
+  }
+  .week-head{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:15px 16px; cursor:pointer; user-select:none;
+  }
+  .week-head:active{background:var(--accent-soft);}
+  .week-title{font-family:var(--serif); font-weight:700; font-size:15px;}
+  .week-dates{font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:2px;}
+  .week-status{display:flex; align-items:center; gap:8px;}
+  .week-count{font-family:var(--mono); font-size:11px; color:var(--muted);}
+  .chev{width:9px; height:9px; border-right:1.5px solid var(--muted); border-bottom:1.5px solid var(--muted); transform:rotate(45deg); transition:transform .2s ease; margin-right:2px;}
+  .week.open .chev{transform:rotate(-135deg);}
+  .week-body{display:none; border-top:1px solid var(--line);}
+  .week.open .week-body{display:block;}
+
+  .day{border-bottom:1px solid var(--line); padding:14px 16px;}
+  .day:last-child{border-bottom:none;}
+  .day-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px;}
+  .day-name{font-weight:700; font-size:13.5px;}
+  .day-date{font-family:var(--mono); font-size:11.5px; color:var(--muted);}
+
+  .session{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;
+  }
+  .session:last-child{margin-bottom:0;}
+  .session-label{
+    grid-column:1 / -1; font-family:var(--mono); font-size:10px; letter-spacing:0.1em;
+    color:var(--muted); text-transform:uppercase; margin-top:4px;
+  }
+  .sig-box{
+    position:relative; border:1px dashed var(--line-strong); border-radius:9px; background:#FDFDFB;
+    height:76px; touch-action:none;
+  }
+  .sig-box canvas{width:100%; height:100%; display:block; border-radius:9px; touch-action:none;}
+  .sig-empty-hint{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:11px; color:#B7C2C1; pointer-events:none; font-family:var(--mono);
+  }
+  .sig-clear{
+    position:absolute; top:5px; right:5px; background:rgba(255,255,255,0.85); border:1px solid var(--line);
+    border-radius:6px; font-size:9.5px; padding:3px 6px; color:var(--muted); font-family:var(--mono);
+  }
+  .name-input{
+    border:1px solid var(--line-strong); border-radius:9px; padding:0 10px; font-size:14px;
+    height:76px; background:#fff; color:var(--ink); width:100%;
+  }
+  .name-input::placeholder{color:#B7C2C1; font-size:12.5px;}
+
+  .comment-row{margin-top:10px;}
+  .comment-input{
+    width:100%; border:1px solid var(--line-strong); border-radius:9px; padding:9px 10px;
+    font-size:13px; font-family:var(--sans); background:#fff; color:var(--ink);
+  }
+  .comment-input::placeholder{color:#B7C2C1;}
+
+  .subweek-heading{
+    display:flex; align-items:center; gap:8px; padding:12px 16px 6px;
+    font-family:var(--mono); font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--accent-ink); background:var(--accent-soft);
+  }
+  .subweek-heading .sw-dates{color:var(--muted); text-transform:none; letter-spacing:0; font-weight:400;}
+
+  .actions-bar{
+    position:fixed; left:0; right:0; bottom:0; z-index:30;
+    background:rgba(250,250,247,0.95); backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);
+    padding:12px 18px calc(env(safe-area-inset-bottom) + 12px);
+    display:flex; gap:10px;
+  }
+  .btn{
+    flex:1; padding:13px 10px; border-radius:11px; border:none; font-size:13.5px; font-weight:600;
+    font-family:var(--sans); display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .btn-primary{background:var(--accent); color:#fff;}
+  .btn-primary:active{background:var(--accent-ink);}
+  .btn-ghost{background:var(--accent-soft); color:var(--accent-ink);}
+  .btn-ghost:active{background:#d3e8e2;}
+  .btn:disabled{opacity:0.45;}
+
+  .toast{
+    position:fixed; left:50%; bottom:96px; transform:translateX(-50%) translateY(8px); opacity:0;
+    background:var(--ink); color:#fff; font-size:12.5px; padding:9px 16px; border-radius:999px;
+    z-index:50; transition:all .25s ease; pointer-events:none; white-space:nowrap;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .archive-item{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:12px 0; border-bottom:1px solid var(--line);
+  }
+  .archive-item:last-child{border-bottom:none;}
+  .archive-name{font-weight:600; font-size:13.5px;}
+  .archive-meta{font-family:var(--mono); font-size:10.5px; color:var(--muted); margin-top:2px;}
+  .archive-btn{
+    font-family:var(--mono); font-size:11px; background:none; border:1px solid var(--line-strong);
+    padding:7px 10px; border-radius:8px; color:var(--ink);
+  }
+  .empty-note{font-size:12.5px; color:var(--muted); text-align:center; padding:6px 0 2px;}
+
+  .link-btn{background:none; border:none; color:var(--accent); font-family:var(--sans); font-size:12.5px; font-weight:600; padding:0;}
+  .danger-text{color:var(--warn);}
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(20,28,32,0.45); z-index:60; display:none;
+    align-items:flex-end; justify-content:center;
+  }
+  .modal-backdrop.show{display:flex;}
+  .modal{
+    background:var(--card); width:100%; max-width:520px; border-radius:18px 18px 0 0;
+    padding:22px 20px calc(env(safe-area-inset-bottom) + 20px); animation:slideup .22s ease;
+  }
+  @keyframes slideup{from{transform:translateY(24px); opacity:0.4;} to{transform:translateY(0); opacity:1;}}
+  .modal h3{font-family:var(--serif); margin:0 0 6px;}
+  .modal p{font-size:13px; color:var(--muted); margin:0 0 16px; line-height:1.5;}
+  .modal-actions{display:flex; gap:10px; margin-top:6px;}
+  .modal-actions .btn{flex:1;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap" style="padding:0;">
+    <div class="topbar-row">
+      <span class="mark"><span class="dot"></span>Attendance Record</span>
+      <span class="eyebrow" id="termLabel">Current term</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-label"><span id="progressText">0 of 0 sessions signed</span><span id="progressPct">0%</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>Placement details</h2>
+    <p class="sub">Set this once per rotation block. Dates for every week fill in automatically.</p>
+    <label class="field">
+      <span class="field-label">Student name</span>
+      <input type="text" id="studentName" placeholder="Full name" autocomplete="name">
+    </label>
+    <div class="row2">
+      <label class="field" style="margin-bottom:0;">
+        <span class="field-label">Monday of week 1</span>
+        <input type="date" id="startDate">
+      </label>
+      <label class="field" style="margin-bottom:0;">
+        <span class="field-label">Weeks</span>
+        <input type="number" id="numWeeks" min="1" max="14" value="7">
+      </label>
+    </div>
+  </div>
+
+  <div class="weeks" id="weeksContainer"></div>
+
+  <div class="card" id="archiveCard" style="display:none;">
+    <h2>Past terms</h2>
+    <p class="sub">Completed rotations stay here so you can re-export a signed record any time.</p>
+    <div id="archiveList"></div>
+  </div>
+
+  <div class="card">
+    <h2>Start a new rotation</h2>
+    <p class="sub">Archives the current record (kept forever on this device) and clears the form for your next block.</p>
+    <button class="link-btn" id="newTermBtn">Archive current term &amp; start fresh →</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="actions-bar">
+  <button class="btn btn-ghost" id="saveNowBtn">Saved ✓</button>
+  <button class="btn btn-primary" id="exportBtn">Save as PDF</button>
+  <button class="btn btn-primary" id="shareBtn" style="background:var(--accent-ink);">Share / Email</button>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h3 id="modalTitle">Heads up</h3>
+    <p id="modalBody"></p>
+    <input type="text" id="modalInput" style="display:none; width:100%; padding:11px 12px; font-size:16px; border:1px solid var(--line-strong); border-radius:9px; margin-bottom:6px;">
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modalCancel">Cancel</button>
+      <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------------------
+   Storage: IndexedDB. This is a plain static page (no Claude account,
+   no server) — everything lives in the browser on this device, works
+   fully offline, and survives closing/reopening from the Home Screen.
+--------------------------------------------------------------------- */
+const DB_NAME = "attendanceRecordApp";
+const STORE = "state";
+const KEY = "root";
+
+function openDB(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => { req.result.createObjectStore(STORE); };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function loadState(){
+  try{
+    const db = await openDB();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, "readonly");
+      const req = tx.objectStore(STORE).get(KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  }catch(e){
+    return null;
+  }
+}
+async function saveState(value){
+  try{
+    const db = await openDB();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).put(value, KEY);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   Date helpers
+--------------------------------------------------------------------- */
+const DAY_NAMES = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+function addDays(iso, n){
+  const d = new Date(iso + "T00:00:00");
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0,10);
+}
+function fmtShort(iso){
+  if(!iso) return "";
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("en-AU", { day:"numeric", month:"short" });
+}
+function fmtLong(iso){
+  if(!iso) return "";
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("en-AU", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+}
+function weekDates(startIso, weekIndex){
+  const monday = addDays(startIso, weekIndex*7);
+  return [0,1,2,3,4].map(i => addDays(monday, i));
+}
+
+/* ---------------------------------------------------------------------
+   State
+--------------------------------------------------------------------- */
+function blankSession(){ return { name:"", sig:null }; } // sig = jpeg dataURL
+function blankDay(){ return { am: blankSession(), pm: blankSession(), comment:"" }; }
+function blankCurrent(){
+  return {
+    studentName:"",
+    startDate:"",
+    numWeeks:7,
+    openBlock:0,
+    days:{} // key "w{week}-d{day}" -> blankDay()
+  };
+}
+let state = {
+  current: blankCurrent(),
+  archive: [] // { id, label, savedAt, snapshot }
+};
+
+function dayKey(w,d){ return "w"+w+"-d"+d; }
+function getDay(w,d){
+  const k = dayKey(w,d);
+  if(!state.current.days[k]) state.current.days[k] = blankDay();
+  return state.current.days[k];
+}
+
+let saveTimer = null;
+function scheduleSave(){
+  const btn = document.getElementById("saveNowBtn");
+  btn.textContent = "Saving…";
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const ok = await saveState(state);
+    btn.textContent = ok ? "Saved ✓" : "Save failed — try again";
+    updateProgress();
+  }, 350);
+}
+
+/* ---------------------------------------------------------------------
+   Signature pad
+--------------------------------------------------------------------- */
+const PAD_W = 300, PAD_H = 110; // fixed aspect ratio used for PDF layout math too
+const PAD_ASPECT = PAD_W / PAD_H;
+
+function createSignaturePad(canvas, existingDataUrl, onChange){
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  canvas.width = PAD_W * ratio;
+  canvas.height = PAD_H * ratio;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(ratio, ratio);
+  ctx.fillStyle = "#FDFDFB";
+  ctx.fillRect(0,0,PAD_W,PAD_H);
+  ctx.strokeStyle = "#1C2B33";
+  ctx.lineWidth = 2.1;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  let drawing = false, hasInk = !!existingDataUrl;
+  let lastX=0, lastY=0;
+
+  if(existingDataUrl){
+    const img = new Image();
+    img.onload = () => ctx.drawImage(img, 0, 0, PAD_W, PAD_H);
+    img.src = existingDataUrl;
+  }
+
+  function pos(evt){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = PAD_W / rect.width, scaleY = PAD_H / rect.height;
+    return [ (evt.clientX - rect.left) * scaleX, (evt.clientY - rect.top) * scaleY ];
+  }
+  function start(evt){
+    evt.preventDefault();
+    canvas.setPointerCapture(evt.pointerId);
+    drawing = true; hasInk = true;
+    [lastX, lastY] = pos(evt);
+  }
+  function move(evt){
+    if(!drawing) return;
+    evt.preventDefault();
+    const [x,y] = pos(evt);
+    ctx.beginPath();
+    ctx.moveTo(lastX,lastY);
+    ctx.lineTo(x,y);
+    ctx.stroke();
+    [lastX,lastY] = [x,y];
+  }
+  function end(evt){
+    if(!drawing) return;
+    drawing = false;
+    onChange(canvas.toDataURL("image/jpeg", 0.85));
+  }
+  // Pointer Events with capture keep move/up scoped to this canvas alone —
+  // no window-level listener needed, so nothing to leak when a week's
+  // cards are re-rendered on open/close.
+  canvas.addEventListener("pointerdown", start);
+  canvas.addEventListener("pointermove", move);
+  canvas.addEventListener("pointerup", end);
+  canvas.addEventListener("pointercancel", end);
+
+  return {
+    clear(){
+      ctx.fillStyle = "#FDFDFB";
+      ctx.fillRect(0,0,PAD_W,PAD_H);
+      hasInk = false;
+      onChange(null);
+    },
+    isEmpty(){ return !hasInk; }
+  };
+}
+
+/* ---------------------------------------------------------------------
+   Rendering
+--------------------------------------------------------------------- */
+const weeksContainer = document.getElementById("weeksContainer");
+
+function render(){
+  document.getElementById("studentName").value = state.current.studentName || "";
+  document.getElementById("startDate").value = state.current.startDate || "";
+  document.getElementById("numWeeks").value = state.current.numWeeks || 7;
+  renderWeeks();
+  renderArchive();
+  updateProgress();
+}
+
+function renderWeeks(){
+  weeksContainer.innerHTML = "";
+  const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
+  const start = state.current.startDate;
+  const numBlocks = Math.ceil(n/2);
+
+  for(let b=0; b<numBlocks; b++){
+    const weekA = b*2;
+    const weekB = (weekA+1 < n) ? weekA+1 : null;
+    const datesA = start ? weekDates(start, weekA) : [null,null,null,null,null];
+    const datesB = weekB!==null && start ? weekDates(start, weekB) : null;
+
+    const blockEl = document.createElement("div");
+    blockEl.className = "week" + (state.current.openBlock === b ? " open" : "");
+
+    const head = document.createElement("div");
+    head.className = "week-head";
+    const titleText = weekB!==null ? `Weeks ${weekA+1}\u2013${weekB+1}` : `Week ${weekA+1}`;
+    const rangeEnd = weekB!==null ? datesB[4] : datesA[4];
+    const rangeLabel = start ? (fmtShort(datesA[0]) + " \u2013 " + fmtShort(rangeEnd)) : "Set a start date above";
+    head.innerHTML = `
+      <div>
+        <div class="week-title">${titleText}</div>
+        <div class="week-dates">${rangeLabel}</div>
+      </div>
+      <div class="week-status">
+        <span class="week-count" data-count-block="${b}"></span>
+        <span class="chev"></span>
+      </div>`;
+    head.addEventListener("click", () => {
+      state.current.openBlock = (state.current.openBlock === b) ? -1 : b;
+      renderWeeks();
+    });
+
+    const body = document.createElement("div");
+    body.className = "week-body";
+    if(state.current.openBlock === b){
+      body.appendChild(subweekHeading(weekA, datesA));
+      for(let d=0; d<5; d++) body.appendChild(renderDayCard(weekA, d, datesA[d]));
+      if(weekB!==null){
+        body.appendChild(subweekHeading(weekB, datesB));
+        for(let d=0; d<5; d++) body.appendChild(renderDayCard(weekB, d, datesB[d]));
+      }
+    }
+
+    blockEl.appendChild(head);
+    blockEl.appendChild(body);
+    weeksContainer.appendChild(blockEl);
+  }
+  refreshWeekCounts();
+}
+
+function subweekHeading(weekIndex, dates){
+  const el = document.createElement("div");
+  el.className = "subweek-heading";
+  const range = dates[0] ? (fmtShort(dates[0]) + " \u2013 " + fmtShort(dates[4])) : "";
+  el.innerHTML = `<span>Week ${weekIndex+1}</span><span class="sw-dates">${range}</span>`;
+  return el;
+}
+
+function renderDayCard(w, d, iso){
+  const day = getDay(w,d);
+  const card = document.createElement("div");
+  card.className = "day";
+  card.innerHTML = `
+    <div class="day-head">
+      <span class="day-name">${DAY_NAMES[d]}</span>
+      <span class="day-date">${iso ? fmtLong(iso).split(",").slice(1).join(",").trim() : "—"}</span>
+    </div>
+    <div class="session-label">AM</div>
+    <div class="session">
+      <div class="sig-box">
+        <canvas></canvas>
+        <div class="sig-empty-hint" data-hint>sign here</div>
+        <button class="sig-clear" data-clear>Clear</button>
+      </div>
+      <input class="name-input" type="text" placeholder="Supervisor name" value="${escapeAttr(day.am.name)}" data-name-input>
+    </div>
+    <div class="session-label">PM</div>
+    <div class="session">
+      <div class="sig-box">
+        <canvas></canvas>
+        <div class="sig-empty-hint" data-hint>sign here</div>
+        <button class="sig-clear" data-clear>Clear</button>
+      </div>
+      <input class="name-input" type="text" placeholder="Supervisor name" value="${escapeAttr(day.pm.name)}" data-name-input>
+    </div>
+    <div class="comment-row">
+      <input class="comment-input" type="text" placeholder="Comment — e.g. sick leave, public holiday, left early" value="${escapeAttr(day.comment)}" data-comment-input>
+    </div>
+  `;
+
+  const commentInput = card.querySelector("[data-comment-input]");
+  commentInput.addEventListener("input", () => {
+    day.comment = commentInput.value;
+    scheduleSave();
+  });
+
+  const sessions = card.querySelectorAll(".session");
+  ["am","pm"].forEach((slot, i) => {
+    const sessionEl = sessions[i];
+    const canvas = sessionEl.querySelector("canvas");
+    const hint = sessionEl.querySelector("[data-hint]");
+    const clearBtn = sessionEl.querySelector("[data-clear]");
+    const nameInput = sessionEl.querySelector("[data-name-input]");
+    const sessData = day[slot];
+
+    if(sessData.sig) hint.style.display = "none";
+
+    const pad = createSignaturePad(canvas, sessData.sig, (dataUrl) => {
+      sessData.sig = dataUrl;
+      hint.style.display = dataUrl ? "none" : "flex";
+      refreshWeekCounts();
+      scheduleSave();
+    });
+
+    clearBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      pad.clear();
+    });
+    nameInput.addEventListener("input", () => {
+      sessData.name = nameInput.value;
+      scheduleSave();
+    });
+  });
+
+  return card;
+}
+
+function escapeAttr(s){
+  return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+}
+
+function refreshWeekCounts(){
+  const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
+  const numBlocks = Math.ceil(n/2);
+  for(let b=0; b<numBlocks; b++){
+    const weekA = b*2;
+    const weekB = (weekA+1 < n) ? weekA+1 : null;
+    let filled = 0, total = 0;
+    [weekA, weekB].forEach(w => {
+      if(w===null) return;
+      for(let d=0; d<5; d++){
+        const day = getDay(w,d);
+        total += 2;
+        if(day.am.sig) filled++;
+        if(day.pm.sig) filled++;
+      }
+    });
+    const el = weeksContainer.querySelector(`[data-count-block="${b}"]`);
+    if(el) el.textContent = filled + "/" + total + " signed";
+  }
+}
+
+function updateProgress(){
+  const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
+  let total = n*10, filled = 0;
+  for(let w=0; w<n; w++){
+    for(let d=0; d<5; d++){
+      const day = getDay(w,d);
+      if(day.am.sig) filled++;
+      if(day.pm.sig) filled++;
+    }
+  }
+  const pct = total ? Math.round((filled/total)*100) : 0;
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressText").textContent = `${filled} of ${total} sessions signed`;
+  document.getElementById("progressPct").textContent = pct + "%";
+}
+
+function renderArchive(){
+  const card = document.getElementById("archiveCard");
+  const list = document.getElementById("archiveList");
+  if(!state.archive.length){ card.style.display = "none"; return; }
+  card.style.display = "block";
+  list.innerHTML = "";
+  state.archive.slice().reverse().forEach((entry) => {
+    const row = document.createElement("div");
+    row.className = "archive-item";
+    row.innerHTML = `
+      <div>
+        <div class="archive-name">${escapeAttr(entry.label)}</div>
+        <div class="archive-meta">Archived ${new Date(entry.savedAt).toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"})}</div>
+      </div>
+      <button class="archive-btn" data-id="${entry.id}">Export PDF</button>
+    `;
+    row.querySelector("button").addEventListener("click", () => exportSnapshot(entry.snapshot, entry.label));
+    list.appendChild(row);
+  });
+}
+
+/* ---------------------------------------------------------------------
+   Field bindings
+--------------------------------------------------------------------- */
+document.getElementById("studentName").addEventListener("input", (e) => {
+  state.current.studentName = e.target.value;
+  scheduleSave();
+});
+document.getElementById("startDate").addEventListener("change", (e) => {
+  state.current.startDate = e.target.value;
+  scheduleSave();
+  renderWeeks();
+});
+document.getElementById("numWeeks").addEventListener("change", (e) => {
+  let v = parseInt(e.target.value,10) || 1;
+  v = Math.max(1, Math.min(14, v));
+  e.target.value = v;
+  state.current.numWeeks = v;
+  scheduleSave();
+  renderWeeks();
+});
+
+/* ---------------------------------------------------------------------
+   Toast + modal helpers
+--------------------------------------------------------------------- */
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.remove("show"), 2600);
+}
+function confirmModal(title, body){
+  return new Promise((resolve) => {
+    const backdrop = document.getElementById("modalBackdrop");
+    document.getElementById("modalTitle").textContent = title;
+    document.getElementById("modalBody").textContent = body;
+    document.getElementById("modalInput").style.display = "none";
+    backdrop.classList.add("show");
+    function cleanup(result){
+      backdrop.classList.remove("show");
+      confirmBtn.removeEventListener("click", onConfirm);
+      cancelBtn.removeEventListener("click", onCancel);
+      resolve(result);
+    }
+    const confirmBtn = document.getElementById("modalConfirm");
+    const cancelBtn = document.getElementById("modalCancel");
+    function onConfirm(){ cleanup(true); }
+    function onCancel(){ cleanup(false); }
+    confirmBtn.addEventListener("click", onConfirm);
+    cancelBtn.addEventListener("click", onCancel);
+  });
+}
+function promptModal(title, body, defaultValue){
+  return new Promise((resolve) => {
+    const backdrop = document.getElementById("modalBackdrop");
+    const input = document.getElementById("modalInput");
+    document.getElementById("modalTitle").textContent = title;
+    document.getElementById("modalBody").textContent = body;
+    input.style.display = "block";
+    input.value = defaultValue || "";
+    backdrop.classList.add("show");
+    setTimeout(() => input.focus(), 50);
+    function cleanup(result){
+      backdrop.classList.remove("show");
+      confirmBtn.removeEventListener("click", onConfirm);
+      cancelBtn.removeEventListener("click", onCancel);
+      resolve(result);
+    }
+    const confirmBtn = document.getElementById("modalConfirm");
+    const cancelBtn = document.getElementById("modalCancel");
+    function onConfirm(){ cleanup(input.value.trim() || defaultValue); }
+    function onCancel(){ cleanup(null); }
+    confirmBtn.addEventListener("click", onConfirm);
+    cancelBtn.addEventListener("click", onCancel);
+  });
+}
+
+/* ---------------------------------------------------------------------
+   New term / archive
+--------------------------------------------------------------------- */
+document.getElementById("newTermBtn").addEventListener("click", async () => {
+  const hasData = Object.keys(state.current.days).some(k => {
+    const d = state.current.days[k];
+    return d.am.sig || d.pm.sig || d.am.name || d.pm.name;
+  });
+  if(!hasData){
+    showToast("Nothing to archive yet");
+    return;
+  }
+  const ok = await confirmModal(
+    "Start a new rotation?",
+    "This term's record will be saved under Past Terms (still exportable any time) and the form will clear for your next block."
+  );
+  if(!ok) return;
+  const label = await promptModal(
+    "Label this term",
+    "e.g. Term 3 2026 – Anaesthetics/ICU/ED",
+    "Term " + (state.archive.length+1)
+  );
+  if(label === null) return;
+  const entry = {
+    id: Date.now().toString(36),
+    label: label || ("Term " + (state.archive.length+1)),
+    savedAt: new Date().toISOString(),
+    snapshot: JSON.parse(JSON.stringify(state.current))
+  };
+  state.archive.push(entry);
+  const keepName = state.current.studentName;
+  state.current = blankCurrent();
+  state.current.studentName = keepName;
+  await saveState(state);
+  render();
+  showToast("Term archived");
+});
+
+/* ---------------------------------------------------------------------
+   PDF generation — hand-written, no external libraries, works fully
+   offline. Renders a classic weekly attendance grid, one week per page.
+--------------------------------------------------------------------- */
+function asciiBytes(str){
+  const arr = new Uint8Array(str.length);
+  for(let i=0;i<str.length;i++) arr[i] = str.charCodeAt(i) & 0xFF;
+  return arr;
+}
+function pdfEscape(s){
+  // Keep to Latin-1 range so bytes map cleanly onto WinAnsiEncoding; swap
+  // common "smart" punctuation (iOS autocorrect) for plain ASCII, then
+  // drop anything else outside 0x20-0xFF (e.g. emoji) rather than
+  // corrupting the PDF's text-showing operator.
+  let out = String(s==null?"":s)
+    .replace(/[\u2018\u2019]/g,"'")
+    .replace(/[\u201C\u201D]/g,'"')
+    .replace(/[\u2013\u2014]/g,"-")
+    .replace(/\u2026/g,"...");
+  out = Array.from(out).map(ch => {
+    const code = ch.codePointAt(0);
+    return (code >= 0x20 && code <= 0xFF) ? ch : "";
+  }).join("");
+  return out.replace(/\\/g,"\\\\").replace(/\(/g,"\\(").replace(/\)/g,"\\)");
+}
+function dataUrlToJpegBytes(dataUrl){
+  const base64 = dataUrl.split(",")[1];
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+function buildPDF(pages){
+  // pages: [{ width, height, ops: string, images: [{name, jpeg, w, h}] }]
+  let nextNum = 1;
+  const catalogNum = nextNum++;
+  const pagesNum = nextNum++;
+  const fontRegNum = nextNum++;
+  const fontBoldNum = nextNum++;
+
+  const pageInfos = pages.map(spec => {
+    const pageNum = nextNum++;
+    const contentNum = nextNum++;
+    const imageNums = spec.images.map(() => nextNum++);
+    return { spec, pageNum, contentNum, imageNums };
+  });
+  const totalObjects = nextNum - 1;
+  const offsets = new Array(totalObjects+1).fill(0);
+  const chunks = [];
+  let currentOffset = 0;
+  function write(bytes){ chunks.push(bytes); currentOffset += bytes.length; }
+  function writeStr(s){ write(asciiBytes(s)); }
+  function beginObj(num){ offsets[num] = currentOffset; writeStr(num+" 0 obj\n"); }
+  function endObj(){ writeStr("endobj\n"); }
+
+  writeStr("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+
+  beginObj(catalogNum);
+  writeStr(`<< /Type /Catalog /Pages ${pagesNum} 0 R >>\n`);
+  endObj();
+
+  beginObj(pagesNum);
+  const kids = pageInfos.map(p => p.pageNum+" 0 R").join(" ");
+  writeStr(`<< /Type /Pages /Kids [${kids}] /Count ${pageInfos.length} >>\n`);
+  endObj();
+
+  beginObj(fontRegNum);
+  writeStr(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\n`);
+  endObj();
+
+  beginObj(fontBoldNum);
+  writeStr(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>\n`);
+  endObj();
+
+  for(const p of pageInfos){
+    const contentBytes = asciiBytes(p.spec.ops);
+
+    beginObj(p.pageNum);
+    let xobjDict = "";
+    if(p.spec.images.length){
+      const entries = p.spec.images.map((img,i) => `/${img.name} ${p.imageNums[i]} 0 R`).join(" ");
+      xobjDict = ` /XObject << ${entries} >>`;
+    }
+    writeStr(`<< /Type /Page /Parent ${pagesNum} 0 R /MediaBox [0 0 ${p.spec.width} ${p.spec.height}] /Resources << /Font << /F1 ${fontRegNum} 0 R /F2 ${fontBoldNum} 0 R >>${xobjDict} >> /Contents ${p.contentNum} 0 R >>\n`);
+    endObj();
+
+    beginObj(p.contentNum);
+    writeStr(`<< /Length ${contentBytes.length} >>\nstream\n`);
+    write(contentBytes);
+    writeStr(`\nendstream\n`);
+    endObj();
+
+    p.spec.images.forEach((img, i) => {
+      beginObj(p.imageNums[i]);
+      writeStr(`<< /Type /XObject /Subtype /Image /Width ${img.w} /Height ${img.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.jpeg.length} >>\nstream\n`);
+      write(img.jpeg);
+      writeStr(`\nendstream\n`);
+      endObj();
+    });
+  }
+
+  const xrefOffset = currentOffset;
+  writeStr(`xref\n0 ${totalObjects+1}\n0000000000 65535 f \n`);
+  for(let i=1;i<=totalObjects;i++){
+    writeStr(offsets[i].toString().padStart(10,"0") + " 00000 n \n");
+  }
+  writeStr(`trailer\n<< /Size ${totalObjects+1} /Root ${catalogNum} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
+
+  let totalLen = 0;
+  for(const c of chunks) totalLen += c.length;
+  const out = new Uint8Array(totalLen);
+  let off = 0;
+  for(const c of chunks){ out.set(c, off); off += c.length; }
+  return out;
+}
+
+function wrapText(text, maxCharsPerLine, maxLines){
+  if(!text) return [];
+  const words = String(text).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let cur = "";
+  for(const w of words){
+    const attempt = cur ? cur + " " + w : w;
+    if(attempt.length > maxCharsPerLine){
+      if(cur) lines.push(cur);
+      cur = w;
+      if(lines.length >= maxLines) break;
+    } else {
+      cur = attempt;
+    }
+  }
+  if(cur && lines.length < maxLines) lines.push(cur);
+  if(lines.length === maxLines){
+    const last = lines[maxLines-1];
+    if(last.length > maxCharsPerLine - 1){
+      lines[maxLines-1] = last.slice(0, maxCharsPerLine-1) + "\u2026";
+    }
+  }
+  return lines;
+}
+
+// Draws one week's Mon–Fri grid (header row, date, AM/PM sign+name, comment)
+// starting at top-down y-coordinate `topY`. Returns the y-coordinate just
+// below the finished table, so a caller can stack a second week beneath it.
+function drawWeekTable(snapshot, weekIndex, topY, images, appendFn, W, H, M){
+  const labelColW = 62;
+  const dayColW = (W - 2*M - labelColW) / 5;
+  const colX = [M, M+labelColW];
+  for(let i=1;i<5;i++) colX.push(colX[colX.length-1] + dayColW);
+  colX.push(M + labelColW + dayColW*5);
+
+  const rowH = [20, 16, 36, 16, 36, 16, 24]; // header, date, am-sign, am-name, pm-sign, pm-name, comment
+  const rowLabels = ["", "Date", "AM Sign", "AM Name", "PM Sign", "PM Name", "Comment"];
+  const tableTop = topY;
+  const rowY = [tableTop];
+  for(const h of rowH) rowY.push(rowY[rowY.length-1] + h);
+  const tableBottom = rowY[rowY.length-1];
+
+  function toPdfY(y){ return H - y; }
+
+  const dates = snapshot.startDate ? weekDates(snapshot.startDate, weekIndex) : [null,null,null,null,null];
+
+  appendFn(`BT /F2 11 Tf ${M} ${toPdfY(tableTop-6)} Td (${pdfEscape("Week " + (weekIndex+1))}) Tj ET\n`);
+  if(dates[0]){
+    const rangeText = fmtShort(dates[0]) + " - " + fmtShort(dates[4]);
+    appendFn(`BT /F1 8.5 Tf ${M+50} ${toPdfY(tableTop-6)} Td (${pdfEscape(rangeText)}) Tj ET\n`);
+  }
+
+  appendFn("0.8 w\n");
+  for(const x of colX){
+    appendFn(`${x} ${toPdfY(tableTop)} m ${x} ${toPdfY(tableBottom)} l S\n`);
+  }
+  for(const y of rowY){
+    appendFn(`${M} ${toPdfY(y)} m ${colX[colX.length-1]} ${toPdfY(y)} l S\n`);
+  }
+
+  for(let r=1;r<rowLabels.length;r++){
+    const midTop = (rowY[r] + rowY[r+1]) / 2 + 2.8;
+    appendFn(`BT /F1 7.5 Tf ${colX[0]+5} ${toPdfY(midTop)} Td (${pdfEscape(rowLabels[r])}) Tj ET\n`);
+  }
+  for(let d=0; d<5; d++){
+    const midTop = (rowY[0]+rowY[1])/2 + 2.8;
+    appendFn(`BT /F2 8.5 Tf ${colX[1+d]+5} ${toPdfY(midTop)} Td (${pdfEscape(DAY_NAMES[d])}) Tj ET\n`);
+  }
+
+  function placeName(name, cx, top, bottom){
+    if(!name) return;
+    const midTop = (top+bottom)/2 + 2.8;
+    appendFn(`BT /F1 7.5 Tf ${cx+5} ${toPdfY(midTop)} Td (${pdfEscape(name)}) Tj ET\n`);
+  }
+  function placeSignature(sigDataUrl, cx, cw, top, bottom){
+    if(!sigDataUrl) return;
+    const pad = 3;
+    const boxW = cw - pad*2;
+    const boxH = (bottom-top) - pad*2;
+    let w = boxW, h = w / PAD_ASPECT;
+    if(h > boxH){ h = boxH; w = h * PAD_ASPECT; }
+    const offsetX = (boxW - w)/2;
+    const offsetY = (boxH - h)/2;
+    const drawTopY = top + pad + offsetY;
+    const drawX = cx + pad + offsetX;
+    const pdfY = H - (drawTopY + h);
+    const name = "Im" + (images.length+1);
+    images.push({ name, jpeg: dataUrlToJpegBytes(sigDataUrl), w: PAD_W, h: PAD_H });
+    appendFn(`q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${drawX.toFixed(2)} ${pdfY.toFixed(2)} cm /${name} Do Q\n`);
+  }
+  function placeComment(text, cx, cw, top, bottom){
+    if(!text) return;
+    const maxChars = Math.max(6, Math.floor((cw-8) / 3.3));
+    const lines = wrapText(text, maxChars, 2);
+    const lineH = 8.5;
+    const blockH = lines.length * lineH;
+    let startTop = (top+bottom)/2 - blockH/2 + 6;
+    lines.forEach((line, i) => {
+      appendFn(`BT /F1 7 Tf ${cx+5} ${toPdfY(startTop + i*lineH)} Td (${pdfEscape(line)}) Tj ET\n`);
+    });
+  }
+
+  for(let d=0; d<5; d++){
+    const day = (snapshot.days && snapshot.days[dayKey(weekIndex,d)]) || blankDay();
+    const cx = colX[1+d];
+    const cw = dayColW;
+
+    if(dates[d]){
+      const midTop = (rowY[1]+rowY[2])/2 + 2.8;
+      appendFn(`BT /F1 7.5 Tf ${cx+5} ${toPdfY(midTop)} Td (${pdfEscape(fmtShort(dates[d]))}) Tj ET\n`);
+    }
+
+    placeSignature(day.am.sig, cx, cw, rowY[2], rowY[3]);
+    placeName(day.am.name, cx, rowY[3], rowY[4]);
+    placeSignature(day.pm.sig, cx, cw, rowY[4], rowY[5]);
+    placeName(day.pm.name, cx, rowY[5], rowY[6]);
+    placeComment(day.comment, cx, cw, rowY[6], rowY[7]);
+  }
+
+  return tableBottom;
+}
+
+function makeBlockPage(snapshot, weekA, weekB){
+  const W = 595, H = 842, M = 40;
+  function toPdfY(y){ return H - y; }
+  let ops = "";
+  const images = [];
+  function append(s){ ops += s; }
+
+  append(`BT /F2 17 Tf ${M} ${toPdfY(38)} Td (${pdfEscape("ATTENDANCE RECORD")}) Tj ET\n`);
+  append(`BT /F1 11 Tf ${M} ${toPdfY(58)} Td (${pdfEscape("Name: " + (snapshot.studentName || ""))}) Tj ET\n`);
+
+  let nextTop = 95;
+  nextTop = drawWeekTable(snapshot, weekA, nextTop, images, append, W, H, M);
+  if(weekB !== null){
+    nextTop = drawWeekTable(snapshot, weekB, nextTop + 26, images, append, W, H, M);
+  }
+
+  return { width: W, height: H, ops, images };
+}
+
+function exportSnapshot(snapshot, label){
+  const n = Math.max(1, Math.min(14, parseInt(snapshot.numWeeks,10) || 1));
+  const numBlocks = Math.ceil(n/2);
+  const pages = [];
+  for(let b=0; b<numBlocks; b++){
+    const weekA = b*2;
+    const weekB = (weekA+1 < n) ? weekA+1 : null;
+    pages.push(makeBlockPage(snapshot, weekA, weekB));
+  }
+  const bytes = buildPDF(pages);
+  const blob = new Blob([bytes], { type: "application/pdf" });
+  const safeName = (snapshot.studentName || "attendance").replace(/[^a-z0-9]+/gi,"_");
+  const filename = `${safeName}_${(label||"record").replace(/[^a-z0-9]+/gi,"_")}.pdf`;
+  return { blob, filename };
+}
+
+/* ---------------------------------------------------------------------
+   Export / Share actions
+--------------------------------------------------------------------- */
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const { blob, filename } = exportSnapshot(state.current, "current");
+  downloadBlob(blob, filename);
+  showToast("PDF ready — use the Files share sheet to keep it in iCloud Drive");
+});
+
+document.getElementById("shareBtn").addEventListener("click", async () => {
+  const { blob, filename } = exportSnapshot(state.current, "current");
+  const file = new File([blob], filename, { type: "application/pdf" });
+  if(navigator.canShare && navigator.canShare({ files: [file] })){
+    try{
+      await navigator.share({
+        files: [file],
+        title: "Attendance record",
+        text: "Signed attendance record for " + (state.current.studentName || "student") + "."
+      });
+      showToast("Shared");
+    }catch(err){
+      if(err && err.name !== "AbortError") showToast("Share cancelled");
+    }
+  } else {
+    // Fallback: download the PDF, then open a pre-filled email (attach manually)
+    downloadBlob(blob, filename);
+    const subject = encodeURIComponent("Attendance record — " + (state.current.studentName || ""));
+    const body = encodeURIComponent(
+      "Hi,\n\nPlease find my attendance record attached.\n\n(The PDF was just downloaded — attach it from Files before sending.)\n\nThanks,\n" + (state.current.studentName || "")
+    );
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    showToast("PDF downloaded — attach it to the email that just opened");
+  }
+});
+
+document.getElementById("saveNowBtn").addEventListener("click", async () => {
+  const ok = await saveState(state);
+  showToast(ok ? "Saved to this device" : "Save failed — try again");
+});
+
+/* ---------------------------------------------------------------------
+   Boot
+--------------------------------------------------------------------- */
+(async function init(){
+  const saved = await loadState();
+  if(saved){
+    state = saved;
+    if(!state.current) state.current = blankCurrent();
+    if(!state.archive) state.archive = [];
+    if(state.current.openBlock === undefined) state.current.openBlock = 0;
+  } else {
+    // Sensible defaults for this rotation block
+    const today = new Date();
+    const monday = new Date(today);
+    const dow = monday.getDay();
+    const diff = (dow === 0 ? -6 : 1) - dow;
+    monday.setDate(monday.getDate() + diff);
+    state.current.startDate = monday.toISOString().slice(0,10);
+    state.current.numWeeks = 7;
+    state.current.openBlock = 0;
+  }
+  render();
+})();
+
+})();
+</script>
+</body>
+</html>
