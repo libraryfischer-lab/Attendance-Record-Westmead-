@@ -120,6 +120,13 @@
     position:absolute; top:5px; right:5px; background:rgba(255,255,255,0.85); border:1px solid var(--line);
     border-radius:6px; font-size:9.5px; padding:3px 6px; color:var(--muted); font-family:var(--mono);
   }
+  .imported-box img{
+    width:100%; height:100%; object-fit:contain; display:block; border-radius:9px; background:#FDFDFB;
+  }
+  .imported-tag{
+    position:absolute; top:5px; left:5px; background:var(--accent); color:#fff; font-family:var(--mono);
+    font-size:8.5px; letter-spacing:0.06em; text-transform:uppercase; padding:2px 6px; border-radius:5px;
+  }
   .name-input{
     border:1px solid var(--line-strong); border-radius:9px; padding:0 10px; font-size:14px;
     height:76px; background:#fff; color:var(--ink); width:100%;
@@ -194,6 +201,55 @@
   .modal p{font-size:13px; color:var(--muted); margin:0 0 16px; line-height:1.5;}
   .modal-actions{display:flex; gap:10px; margin-top:6px;}
   .modal-actions .btn{flex:1;}
+ 
+  /* --- Import from paper overlay --- */
+  .import-overlay{
+    position:fixed; inset:0; background:var(--paper); z-index:70; display:none;
+    flex-direction:column; overflow-y:auto;
+  }
+  .import-overlay.show{display:flex;}
+  .import-sheet{max-width:640px; margin:0 auto; width:100%; padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 24px);}
+  .import-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .import-header h3{font-family:var(--serif); font-size:19px; margin:0;}
+  .import-close{background:var(--accent); color:#fff; border:none; padding:9px 16px; border-radius:9px; font-size:13px; font-weight:600;}
+  .import-file-input{
+    width:100%; padding:12px; border:1px dashed var(--line-strong); border-radius:11px; background:#fff; font-size:13.5px;
+  }
+  .import-status{font-family:var(--mono); font-size:12px; color:var(--muted); margin-top:10px; min-height:16px;}
+  .import-status.error{color:var(--warn);}
+  .import-picker-list{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;}
+  .import-picker-item{
+    border:1px solid var(--line-strong); border-radius:9px; overflow:hidden; width:110px; cursor:pointer; background:#fff;
+  }
+  .import-picker-item img{width:100%; height:80px; object-fit:cover; display:block;}
+  .import-picker-item .cap{font-family:var(--mono); font-size:9.5px; color:var(--muted); padding:4px 6px;}
+  .import-canvas-wrap{
+    position:relative; width:100%; border:1px solid var(--line); border-radius:11px; overflow:hidden;
+    background:#eee; touch-action:none; line-height:0;
+  }
+  .import-canvas-wrap canvas{width:100%; height:auto; display:block;}
+  .crop-rect{
+    position:absolute; border:2px solid var(--accent); background:rgba(15,110,94,0.14);
+    box-shadow:0 0 0 2000px rgba(20,28,32,0.35); touch-action:none; cursor:move;
+  }
+  .crop-handle{
+    position:absolute; width:22px; height:22px; margin:-11px; border-radius:50%;
+    background:#fff; border:2.5px solid var(--accent); touch-action:none;
+  }
+  .crop-handle[data-handle="nw"]{ top:0; left:0; cursor:nwse-resize; }
+  .crop-handle[data-handle="ne"]{ top:0; right:0; left:auto; margin-right:-11px; cursor:nesw-resize; }
+  .crop-handle[data-handle="sw"]{ bottom:0; left:0; margin-bottom:-11px; cursor:nesw-resize; }
+  .crop-handle[data-handle="se"]{ bottom:0; right:0; left:auto; margin-right:-11px; margin-bottom:-11px; cursor:nwse-resize; }
+  .import-hint{font-size:12px; color:var(--muted); margin:10px 0 4px; text-align:center;}
+  .import-target-row{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:14px;}
+  .import-target-row select{
+    width:100%; padding:10px 8px; font-size:13.5px; border:1px solid var(--line-strong); border-radius:9px; background:#fff;
+  }
+  .import-log{margin-top:14px;}
+  .import-log-item{
+    display:flex; justify-content:space-between; align-items:center; padding:8px 10px;
+    background:var(--accent-soft); border-radius:8px; font-size:12.5px; margin-bottom:6px;
+  }
 </style>
 </head>
 <body>
@@ -234,6 +290,12 @@
  
   <div class="weeks" id="weeksContainer"></div>
  
+  <div class="card">
+    <h2>Import a paper-signed page</h2>
+    <p class="sub">Had to use a paper backup for a day or two? Upload a photo or PDF of it, crop out each signature, and drop it straight into the right day below.</p>
+    <button class="link-btn" id="importOpenBtn">Import a photo or PDF →</button>
+  </div>
+ 
   <div class="card" id="archiveCard" style="display:none;">
     <h2>Past terms</h2>
     <p class="sub">Completed rotations stay here so you can re-export a signed record any time.</p>
@@ -264,6 +326,65 @@
     <div class="modal-actions">
       <button class="btn btn-ghost" id="modalCancel">Cancel</button>
       <button class="btn btn-primary" id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+ 
+<div class="import-overlay" id="importOverlay">
+  <div class="import-sheet">
+    <div class="import-header">
+      <h3>Import from paper</h3>
+      <button class="import-close" id="importCloseBtn">Done</button>
+    </div>
+ 
+    <div id="importStep1">
+      <p class="sub">Upload a photo (JPG/PNG/HEIC) or a PDF of the signed page.</p>
+      <input type="file" id="importFileInput" accept="image/*,application/pdf" class="import-file-input">
+      <div id="importStatus" class="import-status"></div>
+    </div>
+ 
+    <div id="importPicker" style="display:none;">
+      <p class="sub">This file has more than one image — tap the one you need.</p>
+      <div id="importPickerList" class="import-picker-list"></div>
+    </div>
+ 
+    <div id="importWorkspace" style="display:none;">
+      <div class="import-canvas-wrap" id="importCanvasWrap">
+        <canvas id="importCanvas"></canvas>
+        <div class="crop-rect" id="cropRect">
+          <div class="crop-handle" data-handle="nw"></div>
+          <div class="crop-handle" data-handle="ne"></div>
+          <div class="crop-handle" data-handle="sw"></div>
+          <div class="crop-handle" data-handle="se"></div>
+        </div>
+      </div>
+      <p class="import-hint">Drag the box over one signature, then assign it below. Repeat for as many as you need from this page.</p>
+ 
+      <div class="import-target-row">
+        <label class="field" style="margin-bottom:0;">
+          <span class="field-label">Week</span>
+          <select id="importWeekSelect"></select>
+        </label>
+        <label class="field" style="margin-bottom:0;">
+          <span class="field-label">Day</span>
+          <select id="importDaySelect">
+            <option value="0">Monday</option>
+            <option value="1">Tuesday</option>
+            <option value="2">Wednesday</option>
+            <option value="3">Thursday</option>
+            <option value="4">Friday</option>
+          </select>
+        </label>
+        <label class="field" style="margin-bottom:0;">
+          <span class="field-label">Session</span>
+          <select id="importSessionSelect">
+            <option value="am">AM</option>
+            <option value="pm">PM</option>
+          </select>
+        </label>
+      </div>
+      <button class="btn btn-primary" id="importAssignBtn" style="width:100%; margin-top:12px;">Add this crop to the selected day</button>
+      <div id="importLog" class="import-log"></div>
     </div>
   </div>
 </div>
@@ -353,7 +474,7 @@ function weekDates(startIso, weekIndex){
 /* ---------------------------------------------------------------------
    State
 --------------------------------------------------------------------- */
-function blankSession(){ return { name:"", sig:null }; } // sig = jpeg dataURL
+function blankSession(){ return { name:"", sig:null, sigW:null, sigH:null, imported:false }; } // sig = jpeg dataURL; sigW/sigH = its real pixel size (needed for correct PDF embedding, and because imported crops aren't a fixed shape like the hand-drawn pad)
 function blankDay(){ return { am: blankSession(), pm: blankSession(), comment:"" }; }
 function blankCurrent(){
   return {
@@ -391,8 +512,7 @@ function scheduleSave(){
 /* ---------------------------------------------------------------------
    Signature pad
 --------------------------------------------------------------------- */
-const PAD_W = 300, PAD_H = 110; // fixed aspect ratio used for PDF layout math too
-const PAD_ASPECT = PAD_W / PAD_H;
+const PAD_W = 300, PAD_H = 110; // logical size of the hand-drawing pad (actual captured pixels scale with devicePixelRatio)
  
 function createSignaturePad(canvas, existingDataUrl, onChange){
   const ratio = Math.max(window.devicePixelRatio || 1, 1);
@@ -440,7 +560,7 @@ function createSignaturePad(canvas, existingDataUrl, onChange){
   function end(evt){
     if(!drawing) return;
     drawing = false;
-    onChange(canvas.toDataURL("image/jpeg", 0.85));
+    onChange(canvas.toDataURL("image/jpeg", 0.85), canvas.width, canvas.height);
   }
   // Pointer Events with capture keep move/up scoped to this canvas alone —
   // no window-level listener needed, so nothing to leak when a week's
@@ -455,7 +575,7 @@ function createSignaturePad(canvas, existingDataUrl, onChange){
       ctx.fillStyle = "#FDFDFB";
       ctx.fillRect(0,0,PAD_W,PAD_H);
       hasInk = false;
-      onChange(null);
+      onChange(null, canvas.width, canvas.height);
     },
     isEmpty(){ return !hasInk; }
   };
@@ -545,23 +665,9 @@ function renderDayCard(w, d, iso){
       <span class="day-date">${iso ? fmtLong(iso).split(",").slice(1).join(",").trim() : "—"}</span>
     </div>
     <div class="session-label">AM</div>
-    <div class="session">
-      <div class="sig-box">
-        <canvas></canvas>
-        <div class="sig-empty-hint" data-hint>sign here</div>
-        <button class="sig-clear" data-clear>Clear</button>
-      </div>
-      <input class="name-input" type="text" placeholder="Supervisor name" value="${escapeAttr(day.am.name)}" data-name-input>
-    </div>
+    <div class="session" data-session="am"></div>
     <div class="session-label">PM</div>
-    <div class="session">
-      <div class="sig-box">
-        <canvas></canvas>
-        <div class="sig-empty-hint" data-hint>sign here</div>
-        <button class="sig-clear" data-clear>Clear</button>
-      </div>
-      <input class="name-input" type="text" placeholder="Supervisor name" value="${escapeAttr(day.pm.name)}" data-name-input>
-    </div>
+    <div class="session" data-session="pm"></div>
     <div class="comment-row">
       <input class="comment-input" type="text" placeholder="Comment — e.g. sick leave, public holiday, left early" value="${escapeAttr(day.comment)}" data-comment-input>
     </div>
@@ -573,35 +679,77 @@ function renderDayCard(w, d, iso){
     scheduleSave();
   });
  
-  const sessions = card.querySelectorAll(".session");
-  ["am","pm"].forEach((slot, i) => {
-    const sessionEl = sessions[i];
-    const canvas = sessionEl.querySelector("canvas");
-    const hint = sessionEl.querySelector("[data-hint]");
-    const clearBtn = sessionEl.querySelector("[data-clear]");
-    const nameInput = sessionEl.querySelector("[data-name-input]");
-    const sessData = day[slot];
- 
-    if(sessData.sig) hint.style.display = "none";
- 
-    const pad = createSignaturePad(canvas, sessData.sig, (dataUrl) => {
-      sessData.sig = dataUrl;
-      hint.style.display = dataUrl ? "none" : "flex";
-      refreshWeekCounts();
-      scheduleSave();
-    });
- 
-    clearBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      pad.clear();
-    });
-    nameInput.addEventListener("input", () => {
-      sessData.name = nameInput.value;
-      scheduleSave();
-    });
+  card.querySelectorAll(".session").forEach((sessionEl) => {
+    const slot = sessionEl.getAttribute("data-session");
+    buildSessionUI(sessionEl, day[slot], w, d, slot);
   });
  
   return card;
+}
+ 
+function isImported(sessData){
+  return !!sessData.sig && !!sessData.imported;
+}
+ 
+// Builds one AM/PM session's UI. Hand-drawn signatures get the live
+// pointer-drawing pad; a session filled in via the paper-import tool
+// gets a static preview of the cropped image instead (drawing on top of
+// an arbitrary-aspect-ratio import doesn't make sense) plus a way to
+// clear it back to a blank pad.
+function buildSessionUI(sessionEl, sessData, w, d, slot){
+  if(isImported(sessData)){
+    sessionEl.innerHTML = `
+      <div class="sig-box imported-box">
+        <img src="${sessData.sig}" alt="Imported signature">
+        <span class="imported-tag">Imported</span>
+        <button class="sig-clear" data-clear-import>Clear</button>
+      </div>
+      <input class="name-input" type="text" placeholder="Supervisor name" value="${escapeAttr(sessData.name)}" data-name-input>
+    `;
+    sessionEl.querySelector("[data-clear-import]").addEventListener("click", (e) => {
+      e.stopPropagation();
+      sessData.sig = null; sessData.sigW = null; sessData.sigH = null; sessData.imported = false;
+      refreshWeekCounts();
+      scheduleSave();
+      buildSessionUI(sessionEl, sessData, w, d, slot);
+    });
+    sessionEl.querySelector("[data-name-input]").addEventListener("input", (e) => {
+      sessData.name = e.target.value;
+      scheduleSave();
+    });
+    return;
+  }
+ 
+  sessionEl.innerHTML = `
+    <div class="sig-box">
+      <canvas></canvas>
+      <div class="sig-empty-hint" data-hint>sign here</div>
+      <button class="sig-clear" data-clear>Clear</button>
+    </div>
+    <input class="name-input" type="text" placeholder="Supervisor name" value="${escapeAttr(sessData.name)}" data-name-input>
+  `;
+  const canvas = sessionEl.querySelector("canvas");
+  const hint = sessionEl.querySelector("[data-hint]");
+  const clearBtn = sessionEl.querySelector("[data-clear]");
+  const nameInput = sessionEl.querySelector("[data-name-input]");
+ 
+  if(sessData.sig) hint.style.display = "none";
+ 
+  const pad = createSignaturePad(canvas, sessData.sig, (dataUrl, imgW, imgH) => {
+    sessData.sig = dataUrl; sessData.sigW = dataUrl ? imgW : null; sessData.sigH = dataUrl ? imgH : null; sessData.imported = false;
+    hint.style.display = dataUrl ? "none" : "flex";
+    refreshWeekCounts();
+    scheduleSave();
+  });
+ 
+  clearBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    pad.clear();
+  });
+  nameInput.addEventListener("input", () => {
+    sessData.name = nameInput.value;
+    scheduleSave();
+  });
 }
  
 function escapeAttr(s){
@@ -972,20 +1120,22 @@ function drawWeekTable(snapshot, weekIndex, topY, images, appendFn, W, H, M){
     const midTop = (top+bottom)/2 + 2.8;
     appendFn(`BT /F1 7.5 Tf ${cx+5} ${toPdfY(midTop)} Td (${pdfEscape(name)}) Tj ET\n`);
   }
-  function placeSignature(sigDataUrl, cx, cw, top, bottom){
+  function placeSignature(sigDataUrl, sigW, sigH, cx, cw, top, bottom){
     if(!sigDataUrl) return;
+    const w0 = sigW || PAD_W, h0 = sigH || PAD_H; // fallback for data saved before per-image sizing existed
+    const aspect = w0 / h0;
     const pad = 3;
     const boxW = cw - pad*2;
     const boxH = (bottom-top) - pad*2;
-    let w = boxW, h = w / PAD_ASPECT;
-    if(h > boxH){ h = boxH; w = h * PAD_ASPECT; }
+    let w = boxW, h = w / aspect;
+    if(h > boxH){ h = boxH; w = h * aspect; }
     const offsetX = (boxW - w)/2;
     const offsetY = (boxH - h)/2;
     const drawTopY = top + pad + offsetY;
     const drawX = cx + pad + offsetX;
     const pdfY = H - (drawTopY + h);
     const name = "Im" + (images.length+1);
-    images.push({ name, jpeg: dataUrlToJpegBytes(sigDataUrl), w: PAD_W, h: PAD_H });
+    images.push({ name, jpeg: dataUrlToJpegBytes(sigDataUrl), w: w0, h: h0 });
     appendFn(`q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${drawX.toFixed(2)} ${pdfY.toFixed(2)} cm /${name} Do Q\n`);
   }
   function placeComment(text, cx, cw, top, bottom){
@@ -1010,9 +1160,9 @@ function drawWeekTable(snapshot, weekIndex, topY, images, appendFn, W, H, M){
       appendFn(`BT /F1 7.5 Tf ${cx+5} ${toPdfY(midTop)} Td (${pdfEscape(fmtShort(dates[d]))}) Tj ET\n`);
     }
  
-    placeSignature(day.am.sig, cx, cw, rowY[2], rowY[3]);
+    placeSignature(day.am.sig, day.am.sigW, day.am.sigH, cx, cw, rowY[2], rowY[3]);
     placeName(day.am.name, cx, rowY[3], rowY[4]);
-    placeSignature(day.pm.sig, cx, cw, rowY[4], rowY[5]);
+    placeSignature(day.pm.sig, day.pm.sigW, day.pm.sigH, cx, cw, rowY[4], rowY[5]);
     placeName(day.pm.name, cx, rowY[5], rowY[6]);
     placeComment(day.comment, cx, cw, rowY[6], rowY[7]);
   }
@@ -1054,6 +1204,386 @@ function exportSnapshot(snapshot, label){
   const filename = `${safeName}_${(label||"record").replace(/[^a-z0-9]+/gi,"_")}.pdf`;
   return { blob, filename };
 }
+ 
+/* ---------------------------------------------------------------------
+   Import from paper: upload a photo or PDF of a paper-signed page,
+   crop out one signature at a time, and drop each crop into whichever
+   day/session it belongs to. Fully client-side, no libraries.
+--------------------------------------------------------------------- */
+function bytesToBinaryString(bytes){
+  let s = "";
+  const CHUNK = 0x8000;
+  for(let i=0;i<bytes.length;i+=CHUNK){
+    s += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i+CHUNK, bytes.length)));
+  }
+  return s;
+}
+function binaryStringToBytes(s){
+  const bytes = new Uint8Array(s.length);
+  for(let i=0;i<s.length;i++) bytes[i] = s.charCodeAt(i) & 0xFF;
+  return bytes;
+}
+function bytesToDataURL(bytes, mime){
+  return `data:${mime};base64,${btoa(bytesToBinaryString(bytes))}`;
+}
+ 
+// --- Minimal PDF structure parser: finds "N 0 obj ... endobj" regions and,
+// within them, the raw byte range of any stream (located by literal
+// "stream"/"endstream" markers rather than trusting /Length, which is more
+// robust against odd generators). ---
+function parsePdfObjects(binStr){
+  const objects = new Map();
+  const objRe = /(\d+)\s+0\s+obj/g;
+  let m;
+  while((m = objRe.exec(binStr))){
+    const num = parseInt(m[1], 10);
+    const bodyStart = objRe.lastIndex;
+    const endIdx = binStr.indexOf("endobj", bodyStart);
+    if(endIdx === -1) continue;
+    const streamIdx = binStr.indexOf("stream", bodyStart);
+    let dict, streamStart = -1, streamEnd = -1;
+    if(streamIdx !== -1 && streamIdx < endIdx){
+      dict = binStr.slice(bodyStart, streamIdx);
+      let s = streamIdx + 6;
+      if(binStr[s] === "\r") s++;
+      if(binStr[s] === "\n") s++;
+      streamStart = s;
+      let e = binStr.lastIndexOf("endstream", endIdx);
+      let trimEnd = e;
+      if(binStr[trimEnd-1] === "\n") trimEnd--;
+      if(binStr[trimEnd-1] === "\r") trimEnd--;
+      streamEnd = trimEnd;
+    } else {
+      dict = binStr.slice(bodyStart, endIdx);
+    }
+    objects.set(num, { dict, streamStart, streamEnd });
+    objRe.lastIndex = endIdx + 6;
+  }
+  return objects;
+}
+function pdfDictGet(dict, key){
+  const re = new RegExp("/" + key + "\\s+([^/>\\[\\]]+?)(?=[\\s/>\\]]|$)");
+  const m = dict.match(re);
+  return m ? m[1].trim() : null;
+}
+function pdfDictHasFilter(dict, filterName){
+  return dict.includes("/" + filterName);
+}
+async function inflateBytes(bytes){
+  const ds = new DecompressionStream("deflate");
+  const stream = new Blob([bytes]).stream().pipeThrough(ds);
+  const out = await new Response(stream).arrayBuffer();
+  return new Uint8Array(out);
+}
+// Interprets decompressed/raw pixel bytes (8-bit DeviceRGB/Gray/CMYK) into
+// canvas-ready RGBA.
+function rawPixelsToRGBA(raw, width, height, colorSpace){
+  const out = new Uint8ClampedArray(width*height*4);
+  if(/Gray/i.test(colorSpace)){
+    for(let i=0;i<width*height;i++){
+      const v = raw[i] || 0;
+      out[i*4]=v; out[i*4+1]=v; out[i*4+2]=v; out[i*4+3]=255;
+    }
+  } else if(/CMYK/i.test(colorSpace)){
+    for(let i=0;i<width*height;i++){
+      const c=(raw[i*4]||0)/255, mm=(raw[i*4+1]||0)/255, y=(raw[i*4+2]||0)/255, k=(raw[i*4+3]||0)/255;
+      out[i*4]   = 255*(1-c)*(1-k);
+      out[i*4+1] = 255*(1-mm)*(1-k);
+      out[i*4+2] = 255*(1-y)*(1-k);
+      out[i*4+3] = 255;
+    }
+  } else { // DeviceRGB (default/fallback)
+    for(let i=0;i<width*height;i++){
+      out[i*4]=raw[i*3]||0; out[i*4+1]=raw[i*3+1]||0; out[i*4+2]=raw[i*3+2]||0; out[i*4+3]=255;
+    }
+  }
+  return out;
+}
+ 
+// Returns [{ width, height, dataUrl }] — every extractable image found in
+// the PDF, normalised to a JPEG data URL so the rest of the app can treat
+// PDF pages and plain photos identically.
+async function extractPdfImages(fileBytes){
+  const binStr = bytesToBinaryString(fileBytes);
+  const objects = parsePdfObjects(binStr);
+  const out = [];
+  for(const [num, entry] of objects){
+    if(!/\/Subtype\s*\/Image\b/.test(entry.dict)) continue;
+    if(entry.streamStart === -1) continue;
+    const widthStr = pdfDictGet(entry.dict, "Width");
+    const heightStr = pdfDictGet(entry.dict, "Height");
+    if(!widthStr || !heightStr) continue;
+    const width = parseInt(widthStr, 10), height = parseInt(heightStr, 10);
+    if(!width || !height || width*height > 60_000_000) continue; // sanity guard
+    const bpcStr = pdfDictGet(entry.dict, "BitsPerComponent");
+    const bpc = bpcStr ? parseInt(bpcStr, 10) : 8;
+    const colorSpace = pdfDictGet(entry.dict, "ColorSpace") || "DeviceRGB";
+    const streamBytes = binaryStringToBytes(binStr.slice(entry.streamStart, entry.streamEnd));
+ 
+    try{
+      if(pdfDictHasFilter(entry.dict, "DCTDecode")){
+        out.push({ width, height, dataUrl: bytesToDataURL(streamBytes, "image/jpeg") });
+      } else if(bpc === 8 && (pdfDictHasFilter(entry.dict, "FlateDecode") || !/\/Filter/.test(entry.dict))){
+        const raw = pdfDictHasFilter(entry.dict, "FlateDecode") ? await inflateBytes(streamBytes) : streamBytes;
+        const rgba = rawPixelsToRGBA(raw, width, height, colorSpace);
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        canvas.getContext("2d").putImageData(new ImageData(rgba, width, height), 0, 0);
+        out.push({ width, height, dataUrl: canvas.toDataURL("image/jpeg", 0.92) });
+      }
+      // Other filters (CCITTFax/JPX/JBIG2) are silently skipped — surfaced
+      // to the user as "no images found" if nothing else in the file works.
+    }catch(e){ /* skip this image, keep trying others */ }
+  }
+  return out;
+}
+ 
+function loadImageFile(file){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { resolve({ width: img.naturalWidth, height: img.naturalHeight, dataUrl: null, imgEl: img, objectUrl: url }); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Couldn't read that image.")); };
+    img.src = url;
+  });
+}
+ 
+const importState = { candidates: [], sourceCanvas: null, scale: 1 };
+ 
+function importPopulateWeekSelect(){
+  const sel = document.getElementById("importWeekSelect");
+  const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
+  sel.innerHTML = "";
+  for(let w=0; w<n; w++){
+    const opt = document.createElement("option");
+    opt.value = w; opt.textContent = "Week " + (w+1);
+    sel.appendChild(opt);
+  }
+}
+ 
+function importReset(){
+  document.getElementById("importFileInput").value = "";
+  document.getElementById("importStatus").textContent = "";
+  document.getElementById("importStatus").className = "import-status";
+  document.getElementById("importStep1").style.display = "block";
+  document.getElementById("importPicker").style.display = "none";
+  document.getElementById("importWorkspace").style.display = "none";
+  document.getElementById("importLog").innerHTML = "";
+  importState.candidates = [];
+  importState.sourceCanvas = null;
+}
+ 
+document.getElementById("importOpenBtn").addEventListener("click", () => {
+  importReset();
+  importPopulateWeekSelect();
+  document.getElementById("importOverlay").classList.add("show");
+});
+document.getElementById("importCloseBtn").addEventListener("click", () => {
+  document.getElementById("importOverlay").classList.remove("show");
+  if(importState.candidates.some(c => c.objectUrl)){
+    importState.candidates.forEach(c => c.objectUrl && URL.revokeObjectURL(c.objectUrl));
+  }
+});
+ 
+document.getElementById("importFileInput").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const statusEl = document.getElementById("importStatus");
+  statusEl.className = "import-status";
+  statusEl.textContent = "Reading file…";
+  try{
+    let candidates = [];
+    if(file.type === "application/pdf" || /\.pdf$/i.test(file.name)){
+      const buf = new Uint8Array(await file.arrayBuffer());
+      candidates = await extractPdfImages(buf);
+      if(!candidates.length){
+        statusEl.className = "import-status error";
+        statusEl.textContent = "Couldn't find a readable image inside that PDF. It may be a text-based PDF rather than a scan, or use an encoding this app can't decode — try uploading a photo or screenshot of the page instead.";
+        return;
+      }
+    } else if(file.type.startsWith("image/") || /\.(heic|heif|jpg|jpeg|png|webp)$/i.test(file.name)){
+      const loaded = await loadImageFile(file);
+      candidates = [loaded];
+    } else {
+      statusEl.className = "import-status error";
+      statusEl.textContent = "That file type isn't supported — please use a photo (JPG/PNG/HEIC) or a PDF.";
+      return;
+    }
+    statusEl.textContent = "";
+    importState.candidates = candidates;
+    if(candidates.length > 1){
+      showImportPicker(candidates);
+    } else {
+      await openImportWorkspace(candidates[0]);
+    }
+  }catch(err){
+    statusEl.className = "import-status error";
+    statusEl.textContent = "Couldn't read that file: " + err.message;
+  }
+});
+ 
+function showImportPicker(candidates){
+  document.getElementById("importStep1").style.display = "none";
+  const picker = document.getElementById("importPicker");
+  picker.style.display = "block";
+  const list = document.getElementById("importPickerList");
+  list.innerHTML = "";
+  candidates.forEach((c, i) => {
+    const item = document.createElement("div");
+    item.className = "import-picker-item";
+    item.innerHTML = `<img src="${c.dataUrl}"><div class="cap">${c.width}×${c.height}</div>`;
+    item.addEventListener("click", async () => {
+      picker.style.display = "none";
+      await openImportWorkspace(c);
+    });
+    list.appendChild(item);
+  });
+}
+ 
+async function openImportWorkspace(candidate){
+  document.getElementById("importStep1").style.display = "none";
+  document.getElementById("importPicker").style.display = "none";
+  document.getElementById("importWorkspace").style.display = "block";
+ 
+  const canvas = document.getElementById("importCanvas");
+  const ctx = canvas.getContext("2d");
+  let srcW, srcH;
+  if(candidate.imgEl){
+    srcW = candidate.width; srcH = candidate.height;
+    canvas.width = srcW; canvas.height = srcH;
+    ctx.drawImage(candidate.imgEl, 0, 0);
+    if(candidate.objectUrl) URL.revokeObjectURL(candidate.objectUrl);
+  } else {
+    await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        srcW = img.naturalWidth; srcH = img.naturalHeight;
+        canvas.width = srcW; canvas.height = srcH;
+        ctx.drawImage(img, 0, 0);
+        resolve();
+      };
+      img.src = candidate.dataUrl;
+    });
+  }
+  importState.sourceCanvas = canvas;
+ 
+  importPopulateWeekSelect();
+  setupCropper(canvas);
+}
+ 
+/* --- Cropper: a draggable/resizable rectangle over the uploaded image.
+   Coordinates are tracked in canvas PIXEL space; the overlay div is
+   positioned in CSS-pixel space via a scale factor from the rendered
+   size, the same pattern used for the signature pad. --- */
+function setupCropper(canvas){
+  const wrap = document.getElementById("importCanvasWrap");
+  const rectEl = document.getElementById("cropRect");
+  const W = canvas.width, H = canvas.height;
+ 
+  let rect = { x: W*0.1, y: H*0.1, w: W*0.5, h: H*0.2 };
+ 
+  function scaleFactor(){
+    const cssW = canvas.getBoundingClientRect().width || 1;
+    return cssW / W;
+  }
+  function draw(){
+    const s = scaleFactor();
+    rectEl.style.left = (rect.x*s) + "px";
+    rectEl.style.top = (rect.y*s) + "px";
+    rectEl.style.width = (rect.w*s) + "px";
+    rectEl.style.height = (rect.h*s) + "px";
+  }
+  function clamp(){
+    rect.w = Math.max(20, Math.min(rect.w, W));
+    rect.h = Math.max(20, Math.min(rect.h, H));
+    rect.x = Math.max(0, Math.min(rect.x, W - rect.w));
+    rect.y = Math.max(0, Math.min(rect.y, H - rect.h));
+  }
+  clamp(); draw();
+  window.addEventListener("resize", draw);
+ 
+  let mode = null, startPt = null, startRect = null;
+  function toCanvasPt(evt){
+    const r = wrap.getBoundingClientRect();
+    const s = scaleFactor();
+    return { x: (evt.clientX - r.left) / s, y: (evt.clientY - r.top) / s };
+  }
+  function onDown(evt, m){
+    evt.preventDefault(); evt.stopPropagation();
+    mode = m;
+    startPt = toCanvasPt(evt);
+    startRect = { ...rect };
+    (evt.target).setPointerCapture && evt.target.setPointerCapture(evt.pointerId);
+  }
+  function onMove(evt){
+    if(!mode) return;
+    evt.preventDefault();
+    const p = toCanvasPt(evt);
+    const dx = p.x - startPt.x, dy = p.y - startPt.y;
+    if(mode === "move"){
+      rect.x = startRect.x + dx; rect.y = startRect.y + dy;
+    } else if(mode === "nw"){
+      rect.x = startRect.x + dx; rect.y = startRect.y + dy;
+      rect.w = startRect.w - dx; rect.h = startRect.h - dy;
+    } else if(mode === "ne"){
+      rect.y = startRect.y + dy;
+      rect.w = startRect.w + dx; rect.h = startRect.h - dy;
+    } else if(mode === "sw"){
+      rect.x = startRect.x + dx;
+      rect.w = startRect.w - dx; rect.h = startRect.h + dy;
+    } else if(mode === "se"){
+      rect.w = startRect.w + dx; rect.h = startRect.h + dy;
+    }
+    clamp(); draw();
+  }
+  function onUp(){ mode = null; }
+ 
+  rectEl.addEventListener("pointerdown", (e) => {
+    if(e.target.classList.contains("crop-handle")) return; // handled separately below
+    onDown(e, "move");
+  });
+  rectEl.querySelectorAll(".crop-handle").forEach(h => {
+    h.addEventListener("pointerdown", (e) => onDown(e, h.getAttribute("data-handle")));
+  });
+  wrap.addEventListener("pointermove", onMove);
+  wrap.addEventListener("pointerup", onUp);
+  wrap.addEventListener("pointercancel", onUp);
+ 
+  importState.getCropPixels = () => ({ ...rect });
+}
+ 
+document.getElementById("importAssignBtn").addEventListener("click", () => {
+  if(!importState.sourceCanvas || !importState.getCropPixels) return;
+  const r = importState.getCropPixels();
+  const cw = Math.round(r.w), ch = Math.round(r.h);
+  const cropCanvas = document.createElement("canvas");
+  cropCanvas.width = cw; cropCanvas.height = ch;
+  cropCanvas.getContext("2d").drawImage(
+    importState.sourceCanvas,
+    Math.round(r.x), Math.round(r.y), cw, ch,
+    0, 0, cw, ch
+  );
+  const dataUrl = cropCanvas.toDataURL("image/jpeg", 0.88);
+ 
+  const w = parseInt(document.getElementById("importWeekSelect").value, 10);
+  const d = parseInt(document.getElementById("importDaySelect").value, 10);
+  const slot = document.getElementById("importSessionSelect").value;
+ 
+  const day = getDay(w, d);
+  const sess = day[slot];
+  sess.sig = dataUrl; sess.sigW = cw; sess.sigH = ch; sess.imported = true;
+  scheduleSave();
+ 
+  const log = document.getElementById("importLog");
+  const entry = document.createElement("div");
+  entry.className = "import-log-item";
+  entry.innerHTML = `<span>Week ${w+1}, ${DAY_NAMES[d]} ${slot.toUpperCase()} ✓</span>`;
+  log.prepend(entry);
+ 
+  // If the affected week is currently open, refresh it in place so the
+  // change is visible without losing the import overlay.
+  renderWeeks();
+});
  
 /* ---------------------------------------------------------------------
    Export / Share actions
@@ -1133,4 +1663,3 @@ document.getElementById("saveNowBtn").addEventListener("click", async () => {
 </script>
 </body>
 </html>
- 
