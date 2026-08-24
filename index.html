@@ -29,7 +29,7 @@
   html,body{margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased;}
   body{padding-bottom:96px;}
   ::selection{background:var(--accent-soft);}
-
+ 
   .topbar{
     position:sticky; top:0; z-index:20;
     background:rgba(250,250,247,0.92);
@@ -48,9 +48,9 @@
   .progress-track{height:5px; background:var(--line); border-radius:4px; overflow:hidden;}
   .progress-fill{height:100%; background:var(--accent); border-radius:4px; transition:width .35s ease;}
   .progress-label{font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:6px; display:flex; justify-content:space-between;}
-
+ 
   .wrap{max-width:640px; margin:0 auto; padding:18px;}
-
+ 
   .card{
     background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
     padding:18px; margin-bottom:16px;
@@ -59,7 +59,7 @@
     font-family:var(--serif); font-size:15px; margin:0 0 3px; font-weight:700;
   }
   .card .sub{font-size:12.5px; color:var(--muted); margin:0 0 14px; line-height:1.5;}
-
+ 
   label.field{display:block; margin-bottom:14px;}
   label.field:last-child{margin-bottom:0;}
   .field-label{
@@ -73,7 +73,7 @@
   }
   input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);}
   .row2{display:grid; grid-template-columns:1fr 110px; gap:10px;}
-
+ 
   .weeks{margin-top:4px;}
   .week{
     border:1px solid var(--line); border-radius:var(--radius); background:var(--card);
@@ -92,13 +92,13 @@
   .week.open .chev{transform:rotate(-135deg);}
   .week-body{display:none; border-top:1px solid var(--line);}
   .week.open .week-body{display:block;}
-
+ 
   .day{border-bottom:1px solid var(--line); padding:14px 16px;}
   .day:last-child{border-bottom:none;}
   .day-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px;}
   .day-name{font-weight:700; font-size:13.5px;}
   .day-date{font-family:var(--mono); font-size:11.5px; color:var(--muted);}
-
+ 
   .session{
     display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;
   }
@@ -125,21 +125,21 @@
     height:76px; background:#fff; color:var(--ink); width:100%;
   }
   .name-input::placeholder{color:#B7C2C1; font-size:12.5px;}
-
+ 
   .comment-row{margin-top:10px;}
   .comment-input{
     width:100%; border:1px solid var(--line-strong); border-radius:9px; padding:9px 10px;
     font-size:13px; font-family:var(--sans); background:#fff; color:var(--ink);
   }
   .comment-input::placeholder{color:#B7C2C1;}
-
+ 
   .subweek-heading{
     display:flex; align-items:center; gap:8px; padding:12px 16px 6px;
     font-family:var(--mono); font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase;
     color:var(--accent-ink); background:var(--accent-soft);
   }
   .subweek-heading .sw-dates{color:var(--muted); text-transform:none; letter-spacing:0; font-weight:400;}
-
+ 
   .actions-bar{
     position:fixed; left:0; right:0; bottom:0; z-index:30;
     background:rgba(250,250,247,0.95); backdrop-filter:blur(10px);
@@ -156,14 +156,14 @@
   .btn-ghost{background:var(--accent-soft); color:var(--accent-ink);}
   .btn-ghost:active{background:#d3e8e2;}
   .btn:disabled{opacity:0.45;}
-
+ 
   .toast{
     position:fixed; left:50%; bottom:96px; transform:translateX(-50%) translateY(8px); opacity:0;
     background:var(--ink); color:#fff; font-size:12.5px; padding:9px 16px; border-radius:999px;
     z-index:50; transition:all .25s ease; pointer-events:none; white-space:nowrap;
   }
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
-
+ 
   .archive-item{
     display:flex; justify-content:space-between; align-items:center; gap:10px;
     padding:12px 0; border-bottom:1px solid var(--line);
@@ -176,10 +176,10 @@
     padding:7px 10px; border-radius:8px; color:var(--ink);
   }
   .empty-note{font-size:12.5px; color:var(--muted); text-align:center; padding:6px 0 2px;}
-
+ 
   .link-btn{background:none; border:none; color:var(--accent); font-family:var(--sans); font-size:12.5px; font-weight:600; padding:0;}
   .danger-text{color:var(--warn);}
-
+ 
   .modal-backdrop{
     position:fixed; inset:0; background:rgba(20,28,32,0.45); z-index:60; display:none;
     align-items:flex-end; justify-content:center;
@@ -197,7 +197,7 @@
 </style>
 </head>
 <body>
-
+ 
 <div class="topbar">
   <div class="wrap" style="padding:0;">
     <div class="topbar-row">
@@ -210,9 +210,9 @@
     </div>
   </div>
 </div>
-
+ 
 <div class="wrap">
-
+ 
   <div class="card">
     <h2>Placement details</h2>
     <p class="sub">Set this once per rotation block. Dates for every week fill in automatically.</p>
@@ -231,31 +231,31 @@
       </label>
     </div>
   </div>
-
+ 
   <div class="weeks" id="weeksContainer"></div>
-
+ 
   <div class="card" id="archiveCard" style="display:none;">
     <h2>Past terms</h2>
     <p class="sub">Completed rotations stay here so you can re-export a signed record any time.</p>
     <div id="archiveList"></div>
   </div>
-
+ 
   <div class="card">
     <h2>Start a new rotation</h2>
     <p class="sub">Archives the current record (kept forever on this device) and clears the form for your next block.</p>
     <button class="link-btn" id="newTermBtn">Archive current term &amp; start fresh →</button>
   </div>
-
+ 
 </div>
-
+ 
 <div class="toast" id="toast"></div>
-
+ 
 <div class="actions-bar">
   <button class="btn btn-ghost" id="saveNowBtn">Saved ✓</button>
   <button class="btn btn-primary" id="exportBtn">Save as PDF</button>
   <button class="btn btn-primary" id="shareBtn" style="background:var(--accent-ink);">Share / Email</button>
 </div>
-
+ 
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal">
     <h3 id="modalTitle">Heads up</h3>
@@ -267,11 +267,11 @@
     </div>
   </div>
 </div>
-
+ 
 <script>
 (function(){
 "use strict";
-
+ 
 /* ---------------------------------------------------------------------
    Storage: IndexedDB. This is a plain static page (no Claude account,
    no server) — everything lives in the browser on this device, works
@@ -280,7 +280,7 @@
 const DB_NAME = "attendanceRecordApp";
 const STORE = "state";
 const KEY = "root";
-
+ 
 function openDB(){
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1);
@@ -316,15 +316,24 @@ async function saveState(value){
     return false;
   }
 }
-
+ 
 /* ---------------------------------------------------------------------
    Date helpers
 --------------------------------------------------------------------- */
 const DAY_NAMES = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+function toIsoLocal(d){
+  // Build YYYY-MM-DD from the date's LOCAL year/month/day. toISOString()
+  // converts to UTC first, which silently shifts the date back a day in
+  // any timezone ahead of UTC (e.g. Sydney, UTC+10/+11) — that was the bug.
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
 function addDays(iso, n){
   const d = new Date(iso + "T00:00:00");
   d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0,10);
+  return toIsoLocal(d);
 }
 function fmtShort(iso){
   if(!iso) return "";
@@ -340,7 +349,7 @@ function weekDates(startIso, weekIndex){
   const monday = addDays(startIso, weekIndex*7);
   return [0,1,2,3,4].map(i => addDays(monday, i));
 }
-
+ 
 /* ---------------------------------------------------------------------
    State
 --------------------------------------------------------------------- */
@@ -359,14 +368,14 @@ let state = {
   current: blankCurrent(),
   archive: [] // { id, label, savedAt, snapshot }
 };
-
+ 
 function dayKey(w,d){ return "w"+w+"-d"+d; }
 function getDay(w,d){
   const k = dayKey(w,d);
   if(!state.current.days[k]) state.current.days[k] = blankDay();
   return state.current.days[k];
 }
-
+ 
 let saveTimer = null;
 function scheduleSave(){
   const btn = document.getElementById("saveNowBtn");
@@ -378,13 +387,13 @@ function scheduleSave(){
     updateProgress();
   }, 350);
 }
-
+ 
 /* ---------------------------------------------------------------------
    Signature pad
 --------------------------------------------------------------------- */
 const PAD_W = 300, PAD_H = 110; // fixed aspect ratio used for PDF layout math too
 const PAD_ASPECT = PAD_W / PAD_H;
-
+ 
 function createSignaturePad(canvas, existingDataUrl, onChange){
   const ratio = Math.max(window.devicePixelRatio || 1, 1);
   canvas.width = PAD_W * ratio;
@@ -397,16 +406,16 @@ function createSignaturePad(canvas, existingDataUrl, onChange){
   ctx.lineWidth = 2.1;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
-
+ 
   let drawing = false, hasInk = !!existingDataUrl;
   let lastX=0, lastY=0;
-
+ 
   if(existingDataUrl){
     const img = new Image();
     img.onload = () => ctx.drawImage(img, 0, 0, PAD_W, PAD_H);
     img.src = existingDataUrl;
   }
-
+ 
   function pos(evt){
     const rect = canvas.getBoundingClientRect();
     const scaleX = PAD_W / rect.width, scaleY = PAD_H / rect.height;
@@ -440,7 +449,7 @@ function createSignaturePad(canvas, existingDataUrl, onChange){
   canvas.addEventListener("pointermove", move);
   canvas.addEventListener("pointerup", end);
   canvas.addEventListener("pointercancel", end);
-
+ 
   return {
     clear(){
       ctx.fillStyle = "#FDFDFB";
@@ -451,12 +460,12 @@ function createSignaturePad(canvas, existingDataUrl, onChange){
     isEmpty(){ return !hasInk; }
   };
 }
-
+ 
 /* ---------------------------------------------------------------------
    Rendering
 --------------------------------------------------------------------- */
 const weeksContainer = document.getElementById("weeksContainer");
-
+ 
 function render(){
   document.getElementById("studentName").value = state.current.studentName || "";
   document.getElementById("startDate").value = state.current.startDate || "";
@@ -465,22 +474,22 @@ function render(){
   renderArchive();
   updateProgress();
 }
-
+ 
 function renderWeeks(){
   weeksContainer.innerHTML = "";
   const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
   const start = state.current.startDate;
   const numBlocks = Math.ceil(n/2);
-
+ 
   for(let b=0; b<numBlocks; b++){
     const weekA = b*2;
     const weekB = (weekA+1 < n) ? weekA+1 : null;
     const datesA = start ? weekDates(start, weekA) : [null,null,null,null,null];
     const datesB = weekB!==null && start ? weekDates(start, weekB) : null;
-
+ 
     const blockEl = document.createElement("div");
     blockEl.className = "week" + (state.current.openBlock === b ? " open" : "");
-
+ 
     const head = document.createElement("div");
     head.className = "week-head";
     const titleText = weekB!==null ? `Weeks ${weekA+1}\u2013${weekB+1}` : `Week ${weekA+1}`;
@@ -499,7 +508,7 @@ function renderWeeks(){
       state.current.openBlock = (state.current.openBlock === b) ? -1 : b;
       renderWeeks();
     });
-
+ 
     const body = document.createElement("div");
     body.className = "week-body";
     if(state.current.openBlock === b){
@@ -510,14 +519,14 @@ function renderWeeks(){
         for(let d=0; d<5; d++) body.appendChild(renderDayCard(weekB, d, datesB[d]));
       }
     }
-
+ 
     blockEl.appendChild(head);
     blockEl.appendChild(body);
     weeksContainer.appendChild(blockEl);
   }
   refreshWeekCounts();
 }
-
+ 
 function subweekHeading(weekIndex, dates){
   const el = document.createElement("div");
   el.className = "subweek-heading";
@@ -525,7 +534,7 @@ function subweekHeading(weekIndex, dates){
   el.innerHTML = `<span>Week ${weekIndex+1}</span><span class="sw-dates">${range}</span>`;
   return el;
 }
-
+ 
 function renderDayCard(w, d, iso){
   const day = getDay(w,d);
   const card = document.createElement("div");
@@ -557,13 +566,13 @@ function renderDayCard(w, d, iso){
       <input class="comment-input" type="text" placeholder="Comment — e.g. sick leave, public holiday, left early" value="${escapeAttr(day.comment)}" data-comment-input>
     </div>
   `;
-
+ 
   const commentInput = card.querySelector("[data-comment-input]");
   commentInput.addEventListener("input", () => {
     day.comment = commentInput.value;
     scheduleSave();
   });
-
+ 
   const sessions = card.querySelectorAll(".session");
   ["am","pm"].forEach((slot, i) => {
     const sessionEl = sessions[i];
@@ -572,16 +581,16 @@ function renderDayCard(w, d, iso){
     const clearBtn = sessionEl.querySelector("[data-clear]");
     const nameInput = sessionEl.querySelector("[data-name-input]");
     const sessData = day[slot];
-
+ 
     if(sessData.sig) hint.style.display = "none";
-
+ 
     const pad = createSignaturePad(canvas, sessData.sig, (dataUrl) => {
       sessData.sig = dataUrl;
       hint.style.display = dataUrl ? "none" : "flex";
       refreshWeekCounts();
       scheduleSave();
     });
-
+ 
     clearBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       pad.clear();
@@ -591,14 +600,14 @@ function renderDayCard(w, d, iso){
       scheduleSave();
     });
   });
-
+ 
   return card;
 }
-
+ 
 function escapeAttr(s){
   return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
 }
-
+ 
 function refreshWeekCounts(){
   const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
   const numBlocks = Math.ceil(n/2);
@@ -619,7 +628,7 @@ function refreshWeekCounts(){
     if(el) el.textContent = filled + "/" + total + " signed";
   }
 }
-
+ 
 function updateProgress(){
   const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
   let total = n*10, filled = 0;
@@ -635,7 +644,7 @@ function updateProgress(){
   document.getElementById("progressText").textContent = `${filled} of ${total} sessions signed`;
   document.getElementById("progressPct").textContent = pct + "%";
 }
-
+ 
 function renderArchive(){
   const card = document.getElementById("archiveCard");
   const list = document.getElementById("archiveList");
@@ -656,7 +665,7 @@ function renderArchive(){
     list.appendChild(row);
   });
 }
-
+ 
 /* ---------------------------------------------------------------------
    Field bindings
 --------------------------------------------------------------------- */
@@ -677,7 +686,7 @@ document.getElementById("numWeeks").addEventListener("change", (e) => {
   scheduleSave();
   renderWeeks();
 });
-
+ 
 /* ---------------------------------------------------------------------
    Toast + modal helpers
 --------------------------------------------------------------------- */
@@ -733,7 +742,7 @@ function promptModal(title, body, defaultValue){
     cancelBtn.addEventListener("click", onCancel);
   });
 }
-
+ 
 /* ---------------------------------------------------------------------
    New term / archive
 --------------------------------------------------------------------- */
@@ -771,7 +780,7 @@ document.getElementById("newTermBtn").addEventListener("click", async () => {
   render();
   showToast("Term archived");
 });
-
+ 
 /* ---------------------------------------------------------------------
    PDF generation — hand-written, no external libraries, works fully
    offline. Renders a classic weekly attendance grid, one week per page.
@@ -804,7 +813,7 @@ function dataUrlToJpegBytes(dataUrl){
   for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
   return bytes;
 }
-
+ 
 function buildPDF(pages){
   // pages: [{ width, height, ops: string, images: [{name, jpeg, w, h}] }]
   let nextNum = 1;
@@ -812,7 +821,7 @@ function buildPDF(pages){
   const pagesNum = nextNum++;
   const fontRegNum = nextNum++;
   const fontBoldNum = nextNum++;
-
+ 
   const pageInfos = pages.map(spec => {
     const pageNum = nextNum++;
     const contentNum = nextNum++;
@@ -827,29 +836,29 @@ function buildPDF(pages){
   function writeStr(s){ write(asciiBytes(s)); }
   function beginObj(num){ offsets[num] = currentOffset; writeStr(num+" 0 obj\n"); }
   function endObj(){ writeStr("endobj\n"); }
-
+ 
   writeStr("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
-
+ 
   beginObj(catalogNum);
   writeStr(`<< /Type /Catalog /Pages ${pagesNum} 0 R >>\n`);
   endObj();
-
+ 
   beginObj(pagesNum);
   const kids = pageInfos.map(p => p.pageNum+" 0 R").join(" ");
   writeStr(`<< /Type /Pages /Kids [${kids}] /Count ${pageInfos.length} >>\n`);
   endObj();
-
+ 
   beginObj(fontRegNum);
   writeStr(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\n`);
   endObj();
-
+ 
   beginObj(fontBoldNum);
   writeStr(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>\n`);
   endObj();
-
+ 
   for(const p of pageInfos){
     const contentBytes = asciiBytes(p.spec.ops);
-
+ 
     beginObj(p.pageNum);
     let xobjDict = "";
     if(p.spec.images.length){
@@ -858,13 +867,13 @@ function buildPDF(pages){
     }
     writeStr(`<< /Type /Page /Parent ${pagesNum} 0 R /MediaBox [0 0 ${p.spec.width} ${p.spec.height}] /Resources << /Font << /F1 ${fontRegNum} 0 R /F2 ${fontBoldNum} 0 R >>${xobjDict} >> /Contents ${p.contentNum} 0 R >>\n`);
     endObj();
-
+ 
     beginObj(p.contentNum);
     writeStr(`<< /Length ${contentBytes.length} >>\nstream\n`);
     write(contentBytes);
     writeStr(`\nendstream\n`);
     endObj();
-
+ 
     p.spec.images.forEach((img, i) => {
       beginObj(p.imageNums[i]);
       writeStr(`<< /Type /XObject /Subtype /Image /Width ${img.w} /Height ${img.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.jpeg.length} >>\nstream\n`);
@@ -873,14 +882,14 @@ function buildPDF(pages){
       endObj();
     });
   }
-
+ 
   const xrefOffset = currentOffset;
   writeStr(`xref\n0 ${totalObjects+1}\n0000000000 65535 f \n`);
   for(let i=1;i<=totalObjects;i++){
     writeStr(offsets[i].toString().padStart(10,"0") + " 00000 n \n");
   }
   writeStr(`trailer\n<< /Size ${totalObjects+1} /Root ${catalogNum} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
-
+ 
   let totalLen = 0;
   for(const c of chunks) totalLen += c.length;
   const out = new Uint8Array(totalLen);
@@ -888,7 +897,7 @@ function buildPDF(pages){
   for(const c of chunks){ out.set(c, off); off += c.length; }
   return out;
 }
-
+ 
 function wrapText(text, maxCharsPerLine, maxLines){
   if(!text) return [];
   const words = String(text).split(/\s+/).filter(Boolean);
@@ -913,7 +922,7 @@ function wrapText(text, maxCharsPerLine, maxLines){
   }
   return lines;
 }
-
+ 
 // Draws one week's Mon–Fri grid (header row, date, AM/PM sign+name, comment)
 // starting at top-down y-coordinate `topY`. Returns the y-coordinate just
 // below the finished table, so a caller can stack a second week beneath it.
@@ -923,24 +932,24 @@ function drawWeekTable(snapshot, weekIndex, topY, images, appendFn, W, H, M){
   const colX = [M, M+labelColW];
   for(let i=1;i<5;i++) colX.push(colX[colX.length-1] + dayColW);
   colX.push(M + labelColW + dayColW*5);
-
+ 
   const rowH = [20, 16, 36, 16, 36, 16, 24]; // header, date, am-sign, am-name, pm-sign, pm-name, comment
   const rowLabels = ["", "Date", "AM Sign", "AM Name", "PM Sign", "PM Name", "Comment"];
   const tableTop = topY;
   const rowY = [tableTop];
   for(const h of rowH) rowY.push(rowY[rowY.length-1] + h);
   const tableBottom = rowY[rowY.length-1];
-
+ 
   function toPdfY(y){ return H - y; }
-
+ 
   const dates = snapshot.startDate ? weekDates(snapshot.startDate, weekIndex) : [null,null,null,null,null];
-
+ 
   appendFn(`BT /F2 11 Tf ${M} ${toPdfY(tableTop-6)} Td (${pdfEscape("Week " + (weekIndex+1))}) Tj ET\n`);
   if(dates[0]){
     const rangeText = fmtShort(dates[0]) + " - " + fmtShort(dates[4]);
     appendFn(`BT /F1 8.5 Tf ${M+50} ${toPdfY(tableTop-6)} Td (${pdfEscape(rangeText)}) Tj ET\n`);
   }
-
+ 
   appendFn("0.8 w\n");
   for(const x of colX){
     appendFn(`${x} ${toPdfY(tableTop)} m ${x} ${toPdfY(tableBottom)} l S\n`);
@@ -948,7 +957,7 @@ function drawWeekTable(snapshot, weekIndex, topY, images, appendFn, W, H, M){
   for(const y of rowY){
     appendFn(`${M} ${toPdfY(y)} m ${colX[colX.length-1]} ${toPdfY(y)} l S\n`);
   }
-
+ 
   for(let r=1;r<rowLabels.length;r++){
     const midTop = (rowY[r] + rowY[r+1]) / 2 + 2.8;
     appendFn(`BT /F1 7.5 Tf ${colX[0]+5} ${toPdfY(midTop)} Td (${pdfEscape(rowLabels[r])}) Tj ET\n`);
@@ -957,7 +966,7 @@ function drawWeekTable(snapshot, weekIndex, topY, images, appendFn, W, H, M){
     const midTop = (rowY[0]+rowY[1])/2 + 2.8;
     appendFn(`BT /F2 8.5 Tf ${colX[1+d]+5} ${toPdfY(midTop)} Td (${pdfEscape(DAY_NAMES[d])}) Tj ET\n`);
   }
-
+ 
   function placeName(name, cx, top, bottom){
     if(!name) return;
     const midTop = (top+bottom)/2 + 2.8;
@@ -990,46 +999,46 @@ function drawWeekTable(snapshot, weekIndex, topY, images, appendFn, W, H, M){
       appendFn(`BT /F1 7 Tf ${cx+5} ${toPdfY(startTop + i*lineH)} Td (${pdfEscape(line)}) Tj ET\n`);
     });
   }
-
+ 
   for(let d=0; d<5; d++){
     const day = (snapshot.days && snapshot.days[dayKey(weekIndex,d)]) || blankDay();
     const cx = colX[1+d];
     const cw = dayColW;
-
+ 
     if(dates[d]){
       const midTop = (rowY[1]+rowY[2])/2 + 2.8;
       appendFn(`BT /F1 7.5 Tf ${cx+5} ${toPdfY(midTop)} Td (${pdfEscape(fmtShort(dates[d]))}) Tj ET\n`);
     }
-
+ 
     placeSignature(day.am.sig, cx, cw, rowY[2], rowY[3]);
     placeName(day.am.name, cx, rowY[3], rowY[4]);
     placeSignature(day.pm.sig, cx, cw, rowY[4], rowY[5]);
     placeName(day.pm.name, cx, rowY[5], rowY[6]);
     placeComment(day.comment, cx, cw, rowY[6], rowY[7]);
   }
-
+ 
   return tableBottom;
 }
-
+ 
 function makeBlockPage(snapshot, weekA, weekB){
   const W = 595, H = 842, M = 40;
   function toPdfY(y){ return H - y; }
   let ops = "";
   const images = [];
   function append(s){ ops += s; }
-
+ 
   append(`BT /F2 17 Tf ${M} ${toPdfY(38)} Td (${pdfEscape("ATTENDANCE RECORD")}) Tj ET\n`);
   append(`BT /F1 11 Tf ${M} ${toPdfY(58)} Td (${pdfEscape("Name: " + (snapshot.studentName || ""))}) Tj ET\n`);
-
+ 
   let nextTop = 95;
   nextTop = drawWeekTable(snapshot, weekA, nextTop, images, append, W, H, M);
   if(weekB !== null){
     nextTop = drawWeekTable(snapshot, weekB, nextTop + 26, images, append, W, H, M);
   }
-
+ 
   return { width: W, height: H, ops, images };
 }
-
+ 
 function exportSnapshot(snapshot, label){
   const n = Math.max(1, Math.min(14, parseInt(snapshot.numWeeks,10) || 1));
   const numBlocks = Math.ceil(n/2);
@@ -1045,7 +1054,7 @@ function exportSnapshot(snapshot, label){
   const filename = `${safeName}_${(label||"record").replace(/[^a-z0-9]+/gi,"_")}.pdf`;
   return { blob, filename };
 }
-
+ 
 /* ---------------------------------------------------------------------
    Export / Share actions
 --------------------------------------------------------------------- */
@@ -1058,13 +1067,13 @@ function downloadBlob(blob, filename){
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
-
+ 
 document.getElementById("exportBtn").addEventListener("click", () => {
   const { blob, filename } = exportSnapshot(state.current, "current");
   downloadBlob(blob, filename);
   showToast("PDF ready — use the Files share sheet to keep it in iCloud Drive");
 });
-
+ 
 document.getElementById("shareBtn").addEventListener("click", async () => {
   const { blob, filename } = exportSnapshot(state.current, "current");
   const file = new File([blob], filename, { type: "application/pdf" });
@@ -1090,12 +1099,12 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
     showToast("PDF downloaded — attach it to the email that just opened");
   }
 });
-
+ 
 document.getElementById("saveNowBtn").addEventListener("click", async () => {
   const ok = await saveState(state);
   showToast(ok ? "Saved to this device" : "Save failed — try again");
 });
-
+ 
 /* ---------------------------------------------------------------------
    Boot
 --------------------------------------------------------------------- */
@@ -1113,14 +1122,15 @@ document.getElementById("saveNowBtn").addEventListener("click", async () => {
     const dow = monday.getDay();
     const diff = (dow === 0 ? -6 : 1) - dow;
     monday.setDate(monday.getDate() + diff);
-    state.current.startDate = monday.toISOString().slice(0,10);
+    state.current.startDate = toIsoLocal(monday);
     state.current.numWeeks = 7;
     state.current.openBlock = 0;
   }
   render();
 })();
-
+ 
 })();
 </script>
 </body>
 </html>
+ 
