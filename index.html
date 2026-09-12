@@ -29,7 +29,7 @@
   html,body{margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased;}
   body{padding-bottom:96px;}
   ::selection{background:var(--accent-soft);}
- 
+
   .topbar{
     position:sticky; top:0; z-index:20;
     background:rgba(250,250,247,0.92);
@@ -44,13 +44,9 @@
   }
   .mark .dot{width:9px; height:9px; border-radius:50%; background:var(--accent); display:inline-block; box-shadow:0 0 0 3px var(--accent-soft);}
   .eyebrow{font-family:var(--mono); font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted);}
-  .progress-wrap{margin-top:10px;}
-  .progress-track{height:5px; background:var(--line); border-radius:4px; overflow:hidden;}
-  .progress-fill{height:100%; background:var(--accent); border-radius:4px; transition:width .35s ease;}
-  .progress-label{font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:6px; display:flex; justify-content:space-between;}
- 
+
   .wrap{max-width:640px; margin:0 auto; padding:18px;}
- 
+
   .card{
     background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
     padding:18px; margin-bottom:16px;
@@ -59,21 +55,39 @@
     font-family:var(--serif); font-size:15px; margin:0 0 3px; font-weight:700;
   }
   .card .sub{font-size:12.5px; color:var(--muted); margin:0 0 14px; line-height:1.5;}
- 
+
   label.field{display:block; margin-bottom:14px;}
   label.field:last-child{margin-bottom:0;}
   .field-label{
     display:block; font-family:var(--mono); font-size:10.5px; letter-spacing:0.08em;
     text-transform:uppercase; color:var(--muted); margin-bottom:6px;
   }
-  input[type=text], input[type=date], input[type=number]{
+  input[type=text], input[type=date], input[type=number], input[type=time]{
     width:100%; padding:11px 12px; font-size:16px; font-family:var(--sans);
     border:1px solid var(--line-strong); border-radius:9px; background:#fff; color:var(--ink);
     appearance:none; -webkit-appearance:none;
   }
   input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);}
-  .row2{display:grid; grid-template-columns:1fr 110px; gap:10px;}
- 
+  .row3{display:grid; grid-template-columns:1fr 90px 100px; gap:10px;}
+
+  /* --- Rotation progress ring --- */
+  .ring-card{display:flex; align-items:center; gap:18px;}
+  .ring-wrap{position:relative; width:118px; height:118px; flex-shrink:0;}
+  .ring-wrap svg{width:100%; height:100%; transform:rotate(-90deg);}
+  .ring-center{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .ring-pct{font-family:var(--serif); font-size:23px; font-weight:700; line-height:1;}
+  .ring-pct-label{font-family:var(--mono); font-size:8.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-top:2px;}
+  .ring-info{flex:1;}
+  .ring-hours{font-family:var(--serif); font-size:17px; font-weight:700; margin-bottom:2px;}
+  .ring-sub{font-size:12.5px; color:var(--muted); margin-bottom:10px;}
+  .ring-weeks{display:flex; flex-wrap:wrap; gap:6px;}
+  .ring-week-chip{
+    font-family:var(--mono); font-size:10px; background:var(--accent-soft); color:var(--accent-ink);
+    padding:4px 8px; border-radius:7px;
+  }
+
   .weeks{margin-top:4px;}
   .week{
     border:1px solid var(--line); border-radius:var(--radius); background:var(--card);
@@ -92,21 +106,22 @@
   .week.open .chev{transform:rotate(-135deg);}
   .week-body{display:none; border-top:1px solid var(--line);}
   .week.open .week-body{display:block;}
- 
+
   .day{border-bottom:1px solid var(--line); padding:14px 16px;}
   .day:last-child{border-bottom:none;}
+  .day.weekend{background:#FBFAF6;}
   .day-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px;}
   .day-name{font-weight:700; font-size:13.5px;}
   .day-date{font-family:var(--mono); font-size:11.5px; color:var(--muted);}
- 
-  .session{
-    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;
+
+  .time-row{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;}
+  .day-hours{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-bottom:10px;
   }
-  .session:last-child{margin-bottom:0;}
-  .session-label{
-    grid-column:1 / -1; font-family:var(--mono); font-size:10px; letter-spacing:0.1em;
-    color:var(--muted); text-transform:uppercase; margin-top:4px;
-  }
+  .day-hours .val{color:var(--accent-ink); font-weight:600;}
+
+  .session{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;}
   .sig-box{
     position:relative; border:1px dashed var(--line-strong); border-radius:9px; background:#FDFDFB;
     height:76px; touch-action:none;
@@ -132,21 +147,14 @@
     height:76px; background:#fff; color:var(--ink); width:100%;
   }
   .name-input::placeholder{color:#B7C2C1; font-size:12.5px;}
- 
+
   .comment-row{margin-top:10px;}
   .comment-input{
     width:100%; border:1px solid var(--line-strong); border-radius:9px; padding:9px 10px;
     font-size:13px; font-family:var(--sans); background:#fff; color:var(--ink);
   }
   .comment-input::placeholder{color:#B7C2C1;}
- 
-  .subweek-heading{
-    display:flex; align-items:center; gap:8px; padding:12px 16px 6px;
-    font-family:var(--mono); font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase;
-    color:var(--accent-ink); background:var(--accent-soft);
-  }
-  .subweek-heading .sw-dates{color:var(--muted); text-transform:none; letter-spacing:0; font-weight:400;}
- 
+
   .actions-bar{
     position:fixed; left:0; right:0; bottom:0; z-index:30;
     background:rgba(250,250,247,0.95); backdrop-filter:blur(10px);
@@ -163,14 +171,14 @@
   .btn-ghost{background:var(--accent-soft); color:var(--accent-ink);}
   .btn-ghost:active{background:#d3e8e2;}
   .btn:disabled{opacity:0.45;}
- 
+
   .toast{
     position:fixed; left:50%; bottom:96px; transform:translateX(-50%) translateY(8px); opacity:0;
     background:var(--ink); color:#fff; font-size:12.5px; padding:9px 16px; border-radius:999px;
     z-index:50; transition:all .25s ease; pointer-events:none; white-space:nowrap;
   }
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
- 
+
   .archive-item{
     display:flex; justify-content:space-between; align-items:center; gap:10px;
     padding:12px 0; border-bottom:1px solid var(--line);
@@ -182,11 +190,9 @@
     font-family:var(--mono); font-size:11px; background:none; border:1px solid var(--line-strong);
     padding:7px 10px; border-radius:8px; color:var(--ink);
   }
-  .empty-note{font-size:12.5px; color:var(--muted); text-align:center; padding:6px 0 2px;}
- 
+
   .link-btn{background:none; border:none; color:var(--accent); font-family:var(--sans); font-size:12.5px; font-weight:600; padding:0;}
-  .danger-text{color:var(--warn);}
- 
+
   .modal-backdrop{
     position:fixed; inset:0; background:rgba(20,28,32,0.45); z-index:60; display:none;
     align-items:flex-end; justify-content:center;
@@ -201,7 +207,7 @@
   .modal p{font-size:13px; color:var(--muted); margin:0 0 16px; line-height:1.5;}
   .modal-actions{display:flex; gap:10px; margin-top:6px;}
   .modal-actions .btn{flex:1;}
- 
+
   /* --- Import from paper overlay --- */
   .import-overlay{
     position:fixed; inset:0; background:var(--paper); z-index:70; display:none;
@@ -241,7 +247,7 @@
   .crop-handle[data-handle="sw"]{ bottom:0; left:0; margin-bottom:-11px; cursor:nesw-resize; }
   .crop-handle[data-handle="se"]{ bottom:0; right:0; left:auto; margin-right:-11px; margin-bottom:-11px; cursor:nwse-resize; }
   .import-hint{font-size:12px; color:var(--muted); margin:10px 0 4px; text-align:center;}
-  .import-target-row{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:14px;}
+  .import-target-row{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px;}
   .import-target-row select{
     width:100%; padding:10px 8px; font-size:13.5px; border:1px solid var(--line-strong); border-radius:9px; background:#fff;
   }
@@ -253,71 +259,90 @@
 </style>
 </head>
 <body>
- 
+
 <div class="topbar">
   <div class="wrap" style="padding:0;">
     <div class="topbar-row">
       <span class="mark"><span class="dot"></span>Attendance Record</span>
-      <span class="eyebrow" id="termLabel">Current term</span>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-      <div class="progress-label"><span id="progressText">0 of 0 sessions signed</span><span id="progressPct">0%</span></div>
+      <span class="eyebrow" id="termLabel">Current rotation</span>
     </div>
   </div>
 </div>
- 
+
 <div class="wrap">
- 
+
+  <div class="card ring-card">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#E4F1EE" stroke-width="12"></circle>
+        <circle id="ringArc" cx="60" cy="60" r="52" fill="none" stroke="#0F6E5E" stroke-width="12"
+          stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-pct" id="ringPct">0%</div>
+        <div class="ring-pct-label">done</div>
+      </div>
+    </div>
+    <div class="ring-info">
+      <div class="ring-hours" id="ringHours">0.0 / 0 hrs</div>
+      <div class="ring-sub" id="ringSub">— hrs left</div>
+      <div class="ring-weeks" id="ringWeeks"></div>
+    </div>
+  </div>
+
   <div class="card">
-    <h2>Placement details</h2>
-    <p class="sub">Set this once per rotation block. Dates for every week fill in automatically.</p>
+    <h2>Rotation details</h2>
+    <p class="sub">Set this once per rotation. Dates for every week fill in automatically.</p>
     <label class="field">
       <span class="field-label">Student name</span>
       <input type="text" id="studentName" placeholder="Full name" autocomplete="name">
     </label>
-    <div class="row2">
+    <div class="row3">
       <label class="field" style="margin-bottom:0;">
         <span class="field-label">Monday of week 1</span>
         <input type="date" id="startDate">
       </label>
       <label class="field" style="margin-bottom:0;">
         <span class="field-label">Weeks</span>
-        <input type="number" id="numWeeks" min="1" max="14" value="7">
+        <input type="number" id="numWeeks" min="1" max="14" value="3">
+      </label>
+      <label class="field" style="margin-bottom:0;">
+        <span class="field-label">Target hrs</span>
+        <input type="number" id="targetHours" min="1" max="500" value="76">
       </label>
     </div>
   </div>
- 
+
   <div class="weeks" id="weeksContainer"></div>
- 
+
   <div class="card">
     <h2>Import a paper-signed page</h2>
     <p class="sub">Had to use a paper backup for a day or two? Upload a photo or PDF of it, crop out each signature, and drop it straight into the right day below.</p>
     <button class="link-btn" id="importOpenBtn">Import a photo or PDF →</button>
   </div>
- 
+
   <div class="card" id="archiveCard" style="display:none;">
-    <h2>Past terms</h2>
+    <h2>Past rotations</h2>
     <p class="sub">Completed rotations stay here so you can re-export a signed record any time.</p>
     <div id="archiveList"></div>
   </div>
- 
+
   <div class="card">
     <h2>Start a new rotation</h2>
     <p class="sub">Archives the current record (kept forever on this device) and clears the form for your next block.</p>
-    <button class="link-btn" id="newTermBtn">Archive current term &amp; start fresh →</button>
+    <button class="link-btn" id="newTermBtn">Archive current rotation &amp; start fresh →</button>
   </div>
- 
+
 </div>
- 
+
 <div class="toast" id="toast"></div>
- 
+
 <div class="actions-bar">
   <button class="btn btn-ghost" id="saveNowBtn">Saved ✓</button>
   <button class="btn btn-primary" id="exportBtn">Save as PDF</button>
   <button class="btn btn-primary" id="shareBtn" style="background:var(--accent-ink);">Share / Email</button>
 </div>
- 
+
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal">
     <h3 id="modalTitle">Heads up</h3>
@@ -329,25 +354,25 @@
     </div>
   </div>
 </div>
- 
+
 <div class="import-overlay" id="importOverlay">
   <div class="import-sheet">
     <div class="import-header">
       <h3>Import from paper</h3>
       <button class="import-close" id="importCloseBtn">Done</button>
     </div>
- 
+
     <div id="importStep1">
       <p class="sub">Upload a photo (JPG/PNG/HEIC) or a PDF of the signed page.</p>
       <input type="file" id="importFileInput" accept="image/*,application/pdf" class="import-file-input">
       <div id="importStatus" class="import-status"></div>
     </div>
- 
+
     <div id="importPicker" style="display:none;">
       <p class="sub">This file has more than one image — tap the one you need.</p>
       <div id="importPickerList" class="import-picker-list"></div>
     </div>
- 
+
     <div id="importWorkspace" style="display:none;">
       <div class="import-canvas-wrap" id="importCanvasWrap">
         <canvas id="importCanvas"></canvas>
@@ -359,7 +384,7 @@
         </div>
       </div>
       <p class="import-hint">Drag the box over one signature, then assign it below. Repeat for as many as you need from this page.</p>
- 
+
       <div class="import-target-row">
         <label class="field" style="margin-bottom:0;">
           <span class="field-label">Week</span>
@@ -373,13 +398,8 @@
             <option value="2">Wednesday</option>
             <option value="3">Thursday</option>
             <option value="4">Friday</option>
-          </select>
-        </label>
-        <label class="field" style="margin-bottom:0;">
-          <span class="field-label">Session</span>
-          <select id="importSessionSelect">
-            <option value="am">AM</option>
-            <option value="pm">PM</option>
+            <option value="5">Saturday</option>
+            <option value="6">Sunday</option>
           </select>
         </label>
       </div>
@@ -388,20 +408,19 @@
     </div>
   </div>
 </div>
- 
+
 <script>
 (function(){
 "use strict";
- 
+
 /* ---------------------------------------------------------------------
-   Storage: IndexedDB. This is a plain static page (no Claude account,
-   no server) — everything lives in the browser on this device, works
-   fully offline, and survives closing/reopening from the Home Screen.
+   Storage: IndexedDB. Plain static page — no account, no server.
 --------------------------------------------------------------------- */
 const DB_NAME = "attendanceRecordApp";
 const STORE = "state";
 const KEY = "root";
- 
+const SCHEMA_VERSION = 2; // v2 = 7-day week, single start/finish per day, hours-based
+
 function openDB(){
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1);
@@ -419,9 +438,7 @@ async function loadState(){
       req.onsuccess = () => resolve(req.result || null);
       req.onerror = () => reject(req.error);
     });
-  }catch(e){
-    return null;
-  }
+  }catch(e){ return null; }
 }
 async function saveState(value){
   try{
@@ -433,19 +450,14 @@ async function saveState(value){
       tx.onerror = () => reject(tx.error);
     });
     return true;
-  }catch(e){
-    return false;
-  }
+  }catch(e){ return false; }
 }
- 
+
 /* ---------------------------------------------------------------------
    Date helpers
 --------------------------------------------------------------------- */
-const DAY_NAMES = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+const DAY_NAMES = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 function toIsoLocal(d){
-  // Build YYYY-MM-DD from the date's LOCAL year/month/day. toISOString()
-  // converts to UTC first, which silently shifts the date back a day in
-  // any timezone ahead of UTC (e.g. Sydney, UTC+10/+11) — that was the bug.
   const y = d.getFullYear();
   const m = String(d.getMonth()+1).padStart(2,"0");
   const day = String(d.getDate()).padStart(2,"0");
@@ -468,35 +480,53 @@ function fmtLong(iso){
 }
 function weekDates(startIso, weekIndex){
   const monday = addDays(startIso, weekIndex*7);
-  return [0,1,2,3,4].map(i => addDays(monday, i));
+  return [0,1,2,3,4,5,6].map(i => addDays(monday, i));
 }
- 
+
+/* ---------------------------------------------------------------------
+   Hours helpers
+--------------------------------------------------------------------- */
+function dayHours(entry){
+  if(!entry || !entry.start || !entry.finish) return 0;
+  const [sh,sm] = entry.start.split(":").map(Number);
+  const [fh,fm] = entry.finish.split(":").map(Number);
+  if([sh,sm,fh,fm].some(n => Number.isNaN(n))) return 0;
+  let startMin = sh*60+sm, finishMin = fh*60+fm;
+  if(finishMin < startMin) finishMin += 24*60; // overnight shift (common in ED)
+  if(finishMin === startMin) return 0; // same time = not a real entry yet
+  return (finishMin-startMin)/60;
+}
+function fmtHours(h){
+  return (Math.round(h*10)/10).toFixed(1);
+}
+
 /* ---------------------------------------------------------------------
    State
 --------------------------------------------------------------------- */
-function blankSession(){ return { name:"", sig:null, sigW:null, sigH:null, imported:false }; } // sig = jpeg dataURL; sigW/sigH = its real pixel size (needed for correct PDF embedding, and because imported crops aren't a fixed shape like the hand-drawn pad)
-function blankDay(){ return { am: blankSession(), pm: blankSession(), comment:"" }; }
+function blankDayEntry(){ return { start:"", finish:"", sig:null, sigW:null, sigH:null, imported:false, name:"", comment:"" }; }
 function blankCurrent(){
   return {
+    schemaVersion: SCHEMA_VERSION,
     studentName:"",
     startDate:"",
-    numWeeks:7,
-    openBlock:0,
-    days:{} // key "w{week}-d{day}" -> blankDay()
+    numWeeks:3,
+    targetHours:76,
+    openWeek:0,
+    days:{} // key "w{week}-d{day}" (d: 0=Mon..6=Sun) -> blankDayEntry()
   };
 }
 let state = {
   current: blankCurrent(),
-  archive: [] // { id, label, savedAt, snapshot }
+  archive: [] // { id, label, savedAt, snapshot, schemaVersion }
 };
- 
+
 function dayKey(w,d){ return "w"+w+"-d"+d; }
 function getDay(w,d){
   const k = dayKey(w,d);
-  if(!state.current.days[k]) state.current.days[k] = blankDay();
+  if(!state.current.days[k]) state.current.days[k] = blankDayEntry();
   return state.current.days[k];
 }
- 
+
 let saveTimer = null;
 function scheduleSave(){
   const btn = document.getElementById("saveNowBtn");
@@ -508,12 +538,12 @@ function scheduleSave(){
     updateProgress();
   }, 350);
 }
- 
+
 /* ---------------------------------------------------------------------
    Signature pad
 --------------------------------------------------------------------- */
 const PAD_W = 300, PAD_H = 110; // logical size of the hand-drawing pad (actual captured pixels scale with devicePixelRatio)
- 
+
 function createSignaturePad(canvas, existingDataUrl, onChange){
   const ratio = Math.max(window.devicePixelRatio || 1, 1);
   canvas.width = PAD_W * ratio;
@@ -526,16 +556,16 @@ function createSignaturePad(canvas, existingDataUrl, onChange){
   ctx.lineWidth = 2.1;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
- 
+
   let drawing = false, hasInk = !!existingDataUrl;
   let lastX=0, lastY=0;
- 
+
   if(existingDataUrl){
     const img = new Image();
     img.onload = () => ctx.drawImage(img, 0, 0, PAD_W, PAD_H);
     img.src = existingDataUrl;
   }
- 
+
   function pos(evt){
     const rect = canvas.getBoundingClientRect();
     const scaleX = PAD_W / rect.width, scaleY = PAD_H / rect.height;
@@ -562,14 +592,11 @@ function createSignaturePad(canvas, existingDataUrl, onChange){
     drawing = false;
     onChange(canvas.toDataURL("image/jpeg", 0.85), canvas.width, canvas.height);
   }
-  // Pointer Events with capture keep move/up scoped to this canvas alone —
-  // no window-level listener needed, so nothing to leak when a week's
-  // cards are re-rendered on open/close.
   canvas.addEventListener("pointerdown", start);
   canvas.addEventListener("pointermove", move);
   canvas.addEventListener("pointerup", end);
   canvas.addEventListener("pointercancel", end);
- 
+
   return {
     clear(){
       ctx.fillStyle = "#FDFDFB";
@@ -580,219 +607,239 @@ function createSignaturePad(canvas, existingDataUrl, onChange){
     isEmpty(){ return !hasInk; }
   };
 }
- 
+
 /* ---------------------------------------------------------------------
    Rendering
 --------------------------------------------------------------------- */
 const weeksContainer = document.getElementById("weeksContainer");
- 
+
 function render(){
   document.getElementById("studentName").value = state.current.studentName || "";
   document.getElementById("startDate").value = state.current.startDate || "";
-  document.getElementById("numWeeks").value = state.current.numWeeks || 7;
+  document.getElementById("numWeeks").value = state.current.numWeeks || 3;
+  document.getElementById("targetHours").value = state.current.targetHours || 76;
   renderWeeks();
   renderArchive();
   updateProgress();
 }
- 
+
 function renderWeeks(){
   weeksContainer.innerHTML = "";
   const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
   const start = state.current.startDate;
-  const numBlocks = Math.ceil(n/2);
- 
-  for(let b=0; b<numBlocks; b++){
-    const weekA = b*2;
-    const weekB = (weekA+1 < n) ? weekA+1 : null;
-    const datesA = start ? weekDates(start, weekA) : [null,null,null,null,null];
-    const datesB = weekB!==null && start ? weekDates(start, weekB) : null;
- 
-    const blockEl = document.createElement("div");
-    blockEl.className = "week" + (state.current.openBlock === b ? " open" : "");
- 
+
+  for(let w=0; w<n; w++){
+    const dates = start ? weekDates(start, w) : new Array(7).fill(null);
+    const weekEl = document.createElement("div");
+    weekEl.className = "week" + (state.current.openWeek === w ? " open" : "");
+
     const head = document.createElement("div");
     head.className = "week-head";
-    const titleText = weekB!==null ? `Weeks ${weekA+1}\u2013${weekB+1}` : `Week ${weekA+1}`;
-    const rangeEnd = weekB!==null ? datesB[4] : datesA[4];
-    const rangeLabel = start ? (fmtShort(datesA[0]) + " \u2013 " + fmtShort(rangeEnd)) : "Set a start date above";
+    const rangeLabel = start ? (fmtShort(dates[0]) + " – " + fmtShort(dates[6])) : "Set a start date above";
     head.innerHTML = `
       <div>
-        <div class="week-title">${titleText}</div>
+        <div class="week-title">Week ${w+1}</div>
         <div class="week-dates">${rangeLabel}</div>
       </div>
       <div class="week-status">
-        <span class="week-count" data-count-block="${b}"></span>
+        <span class="week-count" data-count-week="${w}"></span>
         <span class="chev"></span>
       </div>`;
     head.addEventListener("click", () => {
-      state.current.openBlock = (state.current.openBlock === b) ? -1 : b;
+      state.current.openWeek = (state.current.openWeek === w) ? -1 : w;
       renderWeeks();
     });
- 
+
     const body = document.createElement("div");
     body.className = "week-body";
-    if(state.current.openBlock === b){
-      body.appendChild(subweekHeading(weekA, datesA));
-      for(let d=0; d<5; d++) body.appendChild(renderDayCard(weekA, d, datesA[d]));
-      if(weekB!==null){
-        body.appendChild(subweekHeading(weekB, datesB));
-        for(let d=0; d<5; d++) body.appendChild(renderDayCard(weekB, d, datesB[d]));
-      }
+    if(state.current.openWeek === w){
+      for(let d=0; d<7; d++) body.appendChild(renderDayCard(w, d, dates[d]));
     }
- 
-    blockEl.appendChild(head);
-    blockEl.appendChild(body);
-    weeksContainer.appendChild(blockEl);
+
+    weekEl.appendChild(head);
+    weekEl.appendChild(body);
+    weeksContainer.appendChild(weekEl);
   }
   refreshWeekCounts();
 }
- 
-function subweekHeading(weekIndex, dates){
-  const el = document.createElement("div");
-  el.className = "subweek-heading";
-  const range = dates[0] ? (fmtShort(dates[0]) + " \u2013 " + fmtShort(dates[4])) : "";
-  el.innerHTML = `<span>Week ${weekIndex+1}</span><span class="sw-dates">${range}</span>`;
-  return el;
-}
- 
+
 function renderDayCard(w, d, iso){
-  const day = getDay(w,d);
+  const entry = getDay(w,d);
   const card = document.createElement("div");
-  card.className = "day";
+  card.className = "day" + (d>=5 ? " weekend" : "");
   card.innerHTML = `
     <div class="day-head">
       <span class="day-name">${DAY_NAMES[d]}</span>
       <span class="day-date">${iso ? fmtLong(iso).split(",").slice(1).join(",").trim() : "—"}</span>
     </div>
-    <div class="session-label">AM</div>
-    <div class="session" data-session="am"></div>
-    <div class="session-label">PM</div>
-    <div class="session" data-session="pm"></div>
+    <div class="time-row">
+      <label class="field" style="margin-bottom:0;">
+        <span class="field-label">Start</span>
+        <input type="time" data-start value="${escapeAttr(entry.start)}">
+      </label>
+      <label class="field" style="margin-bottom:0;">
+        <span class="field-label">Finish</span>
+        <input type="time" data-finish value="${escapeAttr(entry.finish)}">
+      </label>
+    </div>
+    <div class="day-hours"><span>Hours worked</span><span class="val" data-hours-val>—</span></div>
+    <div class="session" data-session></div>
     <div class="comment-row">
-      <input class="comment-input" type="text" placeholder="Comment — e.g. sick leave, public holiday, left early" value="${escapeAttr(day.comment)}" data-comment-input>
+      <input class="comment-input" type="text" placeholder="Comment — e.g. sick leave, public holiday, left early" value="${escapeAttr(entry.comment)}" data-comment-input>
     </div>
   `;
- 
-  const commentInput = card.querySelector("[data-comment-input]");
-  commentInput.addEventListener("input", () => {
-    day.comment = commentInput.value;
+
+  const startInput = card.querySelector("[data-start]");
+  const finishInput = card.querySelector("[data-finish]");
+  const hoursVal = card.querySelector("[data-hours-val]");
+
+  function refreshHours(){
+    const h = dayHours(entry);
+    hoursVal.textContent = h > 0 ? fmtHours(h) + " hrs" : "—";
+  }
+  refreshHours();
+
+  startInput.addEventListener("change", () => {
+    entry.start = startInput.value;
+    refreshHours();
+    scheduleSave();
+    updateProgress();
+  });
+  finishInput.addEventListener("change", () => {
+    entry.finish = finishInput.value;
+    refreshHours();
+    scheduleSave();
+    updateProgress();
+  });
+
+  card.querySelector("[data-comment-input]").addEventListener("input", (e) => {
+    entry.comment = e.target.value;
     scheduleSave();
   });
- 
-  card.querySelectorAll(".session").forEach((sessionEl) => {
-    const slot = sessionEl.getAttribute("data-session");
-    buildSessionUI(sessionEl, day[slot], w, d, slot);
-  });
- 
+
+  buildSessionUI(card.querySelector("[data-session]"), entry, w, d);
+
   return card;
 }
- 
-function isImported(sessData){
-  return !!sessData.sig && !!sessData.imported;
+
+function isImported(entry){
+  return !!entry.sig && !!entry.imported;
 }
- 
-// Builds one AM/PM session's UI. Hand-drawn signatures get the live
-// pointer-drawing pad; a session filled in via the paper-import tool
-// gets a static preview of the cropped image instead (drawing on top of
-// an arbitrary-aspect-ratio import doesn't make sense) plus a way to
-// clear it back to a blank pad.
-function buildSessionUI(sessionEl, sessData, w, d, slot){
-  if(isImported(sessData)){
+
+// Signature + supervisor name for one day. Hand-drawn signatures get the
+// live pointer-drawing pad; a day filled in via the paper-import tool
+// gets a static preview instead (drawing on top of an arbitrary-aspect
+// import doesn't make sense) plus a way to clear it back to a blank pad.
+function buildSessionUI(sessionEl, entry, w, d){
+  if(isImported(entry)){
     sessionEl.innerHTML = `
       <div class="sig-box imported-box">
-        <img src="${sessData.sig}" alt="Imported signature">
+        <img src="${entry.sig}" alt="Imported signature">
         <span class="imported-tag">Imported</span>
         <button class="sig-clear" data-clear-import>Clear</button>
       </div>
-      <input class="name-input" type="text" placeholder="Supervisor name" value="${escapeAttr(sessData.name)}" data-name-input>
+      <input class="name-input" type="text" placeholder="Supervisor name" value="${escapeAttr(entry.name)}" data-name-input>
     `;
     sessionEl.querySelector("[data-clear-import]").addEventListener("click", (e) => {
       e.stopPropagation();
-      sessData.sig = null; sessData.sigW = null; sessData.sigH = null; sessData.imported = false;
+      entry.sig = null; entry.sigW = null; entry.sigH = null; entry.imported = false;
       refreshWeekCounts();
       scheduleSave();
-      buildSessionUI(sessionEl, sessData, w, d, slot);
+      buildSessionUI(sessionEl, entry, w, d);
     });
     sessionEl.querySelector("[data-name-input]").addEventListener("input", (e) => {
-      sessData.name = e.target.value;
+      entry.name = e.target.value;
       scheduleSave();
     });
     return;
   }
- 
+
   sessionEl.innerHTML = `
     <div class="sig-box">
       <canvas></canvas>
       <div class="sig-empty-hint" data-hint>sign here</div>
       <button class="sig-clear" data-clear>Clear</button>
     </div>
-    <input class="name-input" type="text" placeholder="Supervisor name" value="${escapeAttr(sessData.name)}" data-name-input>
+    <input class="name-input" type="text" placeholder="Supervisor name" value="${escapeAttr(entry.name)}" data-name-input>
   `;
   const canvas = sessionEl.querySelector("canvas");
   const hint = sessionEl.querySelector("[data-hint]");
   const clearBtn = sessionEl.querySelector("[data-clear]");
   const nameInput = sessionEl.querySelector("[data-name-input]");
- 
-  if(sessData.sig) hint.style.display = "none";
- 
-  const pad = createSignaturePad(canvas, sessData.sig, (dataUrl, imgW, imgH) => {
-    sessData.sig = dataUrl; sessData.sigW = dataUrl ? imgW : null; sessData.sigH = dataUrl ? imgH : null; sessData.imported = false;
+
+  if(entry.sig) hint.style.display = "none";
+
+  const pad = createSignaturePad(canvas, entry.sig, (dataUrl, imgW, imgH) => {
+    entry.sig = dataUrl; entry.sigW = dataUrl ? imgW : null; entry.sigH = dataUrl ? imgH : null; entry.imported = false;
     hint.style.display = dataUrl ? "none" : "flex";
     refreshWeekCounts();
     scheduleSave();
   });
- 
+
   clearBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     pad.clear();
   });
   nameInput.addEventListener("input", () => {
-    sessData.name = nameInput.value;
+    entry.name = nameInput.value;
     scheduleSave();
   });
 }
- 
+
 function escapeAttr(s){
   return (s||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
 }
- 
+
+function weekTotalHours(w){
+  let total = 0;
+  for(let d=0; d<7; d++) total += dayHours(getDay(w,d));
+  return total;
+}
+function rotationTotalHours(){
+  const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
+  let total = 0;
+  for(let w=0; w<n; w++) total += weekTotalHours(w);
+  return total;
+}
+
 function refreshWeekCounts(){
   const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
-  const numBlocks = Math.ceil(n/2);
-  for(let b=0; b<numBlocks; b++){
-    const weekA = b*2;
-    const weekB = (weekA+1 < n) ? weekA+1 : null;
-    let filled = 0, total = 0;
-    [weekA, weekB].forEach(w => {
-      if(w===null) return;
-      for(let d=0; d<5; d++){
-        const day = getDay(w,d);
-        total += 2;
-        if(day.am.sig) filled++;
-        if(day.pm.sig) filled++;
-      }
-    });
-    const el = weeksContainer.querySelector(`[data-count-block="${b}"]`);
-    if(el) el.textContent = filled + "/" + total + " signed";
-  }
-}
- 
-function updateProgress(){
-  const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
-  let total = n*10, filled = 0;
   for(let w=0; w<n; w++){
-    for(let d=0; d<5; d++){
-      const day = getDay(w,d);
-      if(day.am.sig) filled++;
-      if(day.pm.sig) filled++;
-    }
+    const el = weeksContainer.querySelector(`[data-count-week="${w}"]`);
+    if(el) el.textContent = fmtHours(weekTotalHours(w)) + " hrs";
   }
-  const pct = total ? Math.round((filled/total)*100) : 0;
-  document.getElementById("progressFill").style.width = pct + "%";
-  document.getElementById("progressText").textContent = `${filled} of ${total} sessions signed`;
-  document.getElementById("progressPct").textContent = pct + "%";
 }
- 
+
+const RING_CIRC = 2 * Math.PI * 52;
+function updateProgress(){
+  const target = Math.max(1, parseFloat(state.current.targetHours) || 76);
+  const total = rotationTotalHours();
+  const pct = total / target;
+  const clampedPct = Math.max(0, Math.min(1, pct));
+
+  document.getElementById("ringArc").style.strokeDasharray = RING_CIRC.toFixed(1);
+  document.getElementById("ringArc").style.strokeDashoffset = (RING_CIRC * (1 - clampedPct)).toFixed(1);
+  document.getElementById("ringArc").style.stroke = pct >= 1 ? "#0A4A3F" : "#0F6E5E";
+  document.getElementById("ringPct").textContent = Math.round(pct*100) + "%";
+  document.getElementById("ringHours").textContent = `${fmtHours(total)} / ${target} hrs`;
+  const remaining = target - total;
+  document.getElementById("ringSub").textContent = remaining > 0
+    ? `${fmtHours(remaining)} hrs left`
+    : `Target reached — ${fmtHours(Math.abs(remaining))} hrs over`;
+
+  const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
+  const weeksEl = document.getElementById("ringWeeks");
+  weeksEl.innerHTML = "";
+  for(let w=0; w<n; w++){
+    const chip = document.createElement("span");
+    chip.className = "ring-week-chip";
+    chip.textContent = `W${w+1}: ${fmtHours(weekTotalHours(w))}h`;
+    weeksEl.appendChild(chip);
+  }
+
+  refreshWeekCounts();
+}
+
 function renderArchive(){
   const card = document.getElementById("archiveCard");
   const list = document.getElementById("archiveList");
@@ -813,7 +860,7 @@ function renderArchive(){
     list.appendChild(row);
   });
 }
- 
+
 /* ---------------------------------------------------------------------
    Field bindings
 --------------------------------------------------------------------- */
@@ -833,8 +880,17 @@ document.getElementById("numWeeks").addEventListener("change", (e) => {
   state.current.numWeeks = v;
   scheduleSave();
   renderWeeks();
+  updateProgress();
 });
- 
+document.getElementById("targetHours").addEventListener("change", (e) => {
+  let v = parseFloat(e.target.value) || 76;
+  v = Math.max(1, Math.min(500, v));
+  e.target.value = v;
+  state.current.targetHours = v;
+  scheduleSave();
+  updateProgress();
+});
+
 /* ---------------------------------------------------------------------
    Toast + modal helpers
 --------------------------------------------------------------------- */
@@ -890,14 +946,14 @@ function promptModal(title, body, defaultValue){
     cancelBtn.addEventListener("click", onCancel);
   });
 }
- 
+
 /* ---------------------------------------------------------------------
-   New term / archive
+   New rotation / archive
 --------------------------------------------------------------------- */
 document.getElementById("newTermBtn").addEventListener("click", async () => {
   const hasData = Object.keys(state.current.days).some(k => {
-    const d = state.current.days[k];
-    return d.am.sig || d.pm.sig || d.am.name || d.pm.name;
+    const e = state.current.days[k];
+    return e.sig || e.name || e.start || e.finish;
   });
   if(!hasData){
     showToast("Nothing to archive yet");
@@ -905,19 +961,20 @@ document.getElementById("newTermBtn").addEventListener("click", async () => {
   }
   const ok = await confirmModal(
     "Start a new rotation?",
-    "This term's record will be saved under Past Terms (still exportable any time) and the form will clear for your next block."
+    "This rotation's record will be saved under Past Rotations (still exportable any time) and the form will clear for your next block."
   );
   if(!ok) return;
   const label = await promptModal(
-    "Label this term",
-    "e.g. Term 3 2026 – Anaesthetics/ICU/ED",
-    "Term " + (state.archive.length+1)
+    "Label this rotation",
+    "e.g. ED — Term 3 2026",
+    "Rotation " + (state.archive.length+1)
   );
   if(label === null) return;
   const entry = {
     id: Date.now().toString(36),
-    label: label || ("Term " + (state.archive.length+1)),
+    label: label || ("Rotation " + (state.archive.length+1)),
     savedAt: new Date().toISOString(),
+    schemaVersion: SCHEMA_VERSION,
     snapshot: JSON.parse(JSON.stringify(state.current))
   };
   state.archive.push(entry);
@@ -926,12 +983,13 @@ document.getElementById("newTermBtn").addEventListener("click", async () => {
   state.current.studentName = keepName;
   await saveState(state);
   render();
-  showToast("Term archived");
+  showToast("Rotation archived");
 });
- 
+
 /* ---------------------------------------------------------------------
    PDF generation — hand-written, no external libraries, works fully
-   offline. Renders a classic weekly attendance grid, one week per page.
+   offline. One page per week: 7 columns (Mon–Sun), rows for Start,
+   Finish, Hours, Signature, Name, Comment.
 --------------------------------------------------------------------- */
 function asciiBytes(str){
   const arr = new Uint8Array(str.length);
@@ -939,10 +997,6 @@ function asciiBytes(str){
   return arr;
 }
 function pdfEscape(s){
-  // Keep to Latin-1 range so bytes map cleanly onto WinAnsiEncoding; swap
-  // common "smart" punctuation (iOS autocorrect) for plain ASCII, then
-  // drop anything else outside 0x20-0xFF (e.g. emoji) rather than
-  // corrupting the PDF's text-showing operator.
   let out = String(s==null?"":s)
     .replace(/[\u2018\u2019]/g,"'")
     .replace(/[\u201C\u201D]/g,'"')
@@ -961,91 +1015,6 @@ function dataUrlToJpegBytes(dataUrl){
   for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
   return bytes;
 }
- 
-function buildPDF(pages){
-  // pages: [{ width, height, ops: string, images: [{name, jpeg, w, h}] }]
-  let nextNum = 1;
-  const catalogNum = nextNum++;
-  const pagesNum = nextNum++;
-  const fontRegNum = nextNum++;
-  const fontBoldNum = nextNum++;
- 
-  const pageInfos = pages.map(spec => {
-    const pageNum = nextNum++;
-    const contentNum = nextNum++;
-    const imageNums = spec.images.map(() => nextNum++);
-    return { spec, pageNum, contentNum, imageNums };
-  });
-  const totalObjects = nextNum - 1;
-  const offsets = new Array(totalObjects+1).fill(0);
-  const chunks = [];
-  let currentOffset = 0;
-  function write(bytes){ chunks.push(bytes); currentOffset += bytes.length; }
-  function writeStr(s){ write(asciiBytes(s)); }
-  function beginObj(num){ offsets[num] = currentOffset; writeStr(num+" 0 obj\n"); }
-  function endObj(){ writeStr("endobj\n"); }
- 
-  writeStr("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
- 
-  beginObj(catalogNum);
-  writeStr(`<< /Type /Catalog /Pages ${pagesNum} 0 R >>\n`);
-  endObj();
- 
-  beginObj(pagesNum);
-  const kids = pageInfos.map(p => p.pageNum+" 0 R").join(" ");
-  writeStr(`<< /Type /Pages /Kids [${kids}] /Count ${pageInfos.length} >>\n`);
-  endObj();
- 
-  beginObj(fontRegNum);
-  writeStr(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\n`);
-  endObj();
- 
-  beginObj(fontBoldNum);
-  writeStr(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>\n`);
-  endObj();
- 
-  for(const p of pageInfos){
-    const contentBytes = asciiBytes(p.spec.ops);
- 
-    beginObj(p.pageNum);
-    let xobjDict = "";
-    if(p.spec.images.length){
-      const entries = p.spec.images.map((img,i) => `/${img.name} ${p.imageNums[i]} 0 R`).join(" ");
-      xobjDict = ` /XObject << ${entries} >>`;
-    }
-    writeStr(`<< /Type /Page /Parent ${pagesNum} 0 R /MediaBox [0 0 ${p.spec.width} ${p.spec.height}] /Resources << /Font << /F1 ${fontRegNum} 0 R /F2 ${fontBoldNum} 0 R >>${xobjDict} >> /Contents ${p.contentNum} 0 R >>\n`);
-    endObj();
- 
-    beginObj(p.contentNum);
-    writeStr(`<< /Length ${contentBytes.length} >>\nstream\n`);
-    write(contentBytes);
-    writeStr(`\nendstream\n`);
-    endObj();
- 
-    p.spec.images.forEach((img, i) => {
-      beginObj(p.imageNums[i]);
-      writeStr(`<< /Type /XObject /Subtype /Image /Width ${img.w} /Height ${img.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.jpeg.length} >>\nstream\n`);
-      write(img.jpeg);
-      writeStr(`\nendstream\n`);
-      endObj();
-    });
-  }
- 
-  const xrefOffset = currentOffset;
-  writeStr(`xref\n0 ${totalObjects+1}\n0000000000 65535 f \n`);
-  for(let i=1;i<=totalObjects;i++){
-    writeStr(offsets[i].toString().padStart(10,"0") + " 00000 n \n");
-  }
-  writeStr(`trailer\n<< /Size ${totalObjects+1} /Root ${catalogNum} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
- 
-  let totalLen = 0;
-  for(const c of chunks) totalLen += c.length;
-  const out = new Uint8Array(totalLen);
-  let off = 0;
-  for(const c of chunks){ out.set(c, off); off += c.length; }
-  return out;
-}
- 
 function wrapText(text, maxCharsPerLine, maxLines){
   if(!text) return [];
   const words = String(text).split(/\s+/).filter(Boolean);
@@ -1070,59 +1039,149 @@ function wrapText(text, maxCharsPerLine, maxLines){
   }
   return lines;
 }
- 
-// Draws one week's Mon–Fri grid (header row, date, AM/PM sign+name, comment)
-// starting at top-down y-coordinate `topY`. Returns the y-coordinate just
-// below the finished table, so a caller can stack a second week beneath it.
-function drawWeekTable(snapshot, weekIndex, topY, images, appendFn, W, H, M){
-  const labelColW = 62;
-  const dayColW = (W - 2*M - labelColW) / 5;
+
+function buildPDF(pages){
+  // pages: [{ width, height, ops: string, images: [{name, jpeg, w, h}] }]
+  let nextNum = 1;
+  const catalogNum = nextNum++;
+  const pagesNum = nextNum++;
+  const fontRegNum = nextNum++;
+  const fontBoldNum = nextNum++;
+
+  const pageInfos = pages.map(spec => {
+    const pageNum = nextNum++;
+    const contentNum = nextNum++;
+    const imageNums = spec.images.map(() => nextNum++);
+    return { spec, pageNum, contentNum, imageNums };
+  });
+  const totalObjects = nextNum - 1;
+  const offsets = new Array(totalObjects+1).fill(0);
+  const chunks = [];
+  let currentOffset = 0;
+  function write(bytes){ chunks.push(bytes); currentOffset += bytes.length; }
+  function writeStr(s){ write(asciiBytes(s)); }
+  function beginObj(num){ offsets[num] = currentOffset; writeStr(num+" 0 obj\n"); }
+  function endObj(){ writeStr("endobj\n"); }
+
+  writeStr("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+
+  beginObj(catalogNum);
+  writeStr(`<< /Type /Catalog /Pages ${pagesNum} 0 R >>\n`);
+  endObj();
+
+  beginObj(pagesNum);
+  const kids = pageInfos.map(p => p.pageNum+" 0 R").join(" ");
+  writeStr(`<< /Type /Pages /Kids [${kids}] /Count ${pageInfos.length} >>\n`);
+  endObj();
+
+  beginObj(fontRegNum);
+  writeStr(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\n`);
+  endObj();
+
+  beginObj(fontBoldNum);
+  writeStr(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>\n`);
+  endObj();
+
+  for(const p of pageInfos){
+    const contentBytes = asciiBytes(p.spec.ops);
+
+    beginObj(p.pageNum);
+    let xobjDict = "";
+    if(p.spec.images.length){
+      const entries = p.spec.images.map((img,i) => `/${img.name} ${p.imageNums[i]} 0 R`).join(" ");
+      xobjDict = ` /XObject << ${entries} >>`;
+    }
+    writeStr(`<< /Type /Page /Parent ${pagesNum} 0 R /MediaBox [0 0 ${p.spec.width} ${p.spec.height}] /Resources << /Font << /F1 ${fontRegNum} 0 R /F2 ${fontBoldNum} 0 R >>${xobjDict} >> /Contents ${p.contentNum} 0 R >>\n`);
+    endObj();
+
+    beginObj(p.contentNum);
+    writeStr(`<< /Length ${contentBytes.length} >>\nstream\n`);
+    write(contentBytes);
+    writeStr(`\nendstream\n`);
+    endObj();
+
+    p.spec.images.forEach((img, i) => {
+      beginObj(p.imageNums[i]);
+      writeStr(`<< /Type /XObject /Subtype /Image /Width ${img.w} /Height ${img.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.jpeg.length} >>\nstream\n`);
+      write(img.jpeg);
+      writeStr(`\nendstream\n`);
+      endObj();
+    });
+  }
+
+  const xrefOffset = currentOffset;
+  writeStr(`xref\n0 ${totalObjects+1}\n0000000000 65535 f \n`);
+  for(let i=1;i<=totalObjects;i++){
+    writeStr(offsets[i].toString().padStart(10,"0") + " 00000 n \n");
+  }
+  writeStr(`trailer\n<< /Size ${totalObjects+1} /Root ${catalogNum} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
+
+  let totalLen = 0;
+  for(const c of chunks) totalLen += c.length;
+  const out = new Uint8Array(totalLen);
+  let off = 0;
+  for(const c of chunks){ out.set(c, off); off += c.length; }
+  return out;
+}
+
+function makeWeekPage(snapshot, weekIndex, rotationTotalsUpToWeek){
+  const W = 842, H = 595, M = 36; // landscape A4 — 7 columns need the width
+  function toPdfY(y){ return H - y; }
+  let ops = "";
+  const images = [];
+  function append(s){ ops += s; }
+
+  const dates = snapshot.startDate ? weekDates(snapshot.startDate, weekIndex) : new Array(7).fill(null);
+
+  append(`BT /F2 16 Tf ${M} ${toPdfY(32)} Td (${pdfEscape("ATTENDANCE RECORD")}) Tj ET\n`);
+  append(`BT /F1 10 Tf ${M} ${toPdfY(50)} Td (${pdfEscape("Name: " + (snapshot.studentName || ""))}) Tj ET\n`);
+  append(`BT /F2 11 Tf ${M+220} ${toPdfY(50)} Td (${pdfEscape("Week " + (weekIndex+1))}) Tj ET\n`);
+  if(dates[0]){
+    append(`BT /F1 9 Tf ${M+270} ${toPdfY(50)} Td (${pdfEscape(fmtShort(dates[0]) + " - " + fmtShort(dates[6]))}) Tj ET\n`);
+  }
+  const weekTotal = [0,1,2,3,4,5,6].reduce((s,d) => s + dayHours((snapshot.days||{})[dayKey(weekIndex,d)] || blankDayEntry()), 0);
+  const target = snapshot.targetHours || 76;
+  const runningTotal = (rotationTotalsUpToWeek != null) ? rotationTotalsUpToWeek : weekTotal;
+  append(`BT /F1 9 Tf ${M+420} ${toPdfY(50)} Td (${pdfEscape("Week total: " + fmtHours(weekTotal) + " hrs   |   Rotation to date: " + fmtHours(runningTotal) + " / " + target + " hrs")}) Tj ET\n`);
+
+  const labelColW = 58;
+  const dayColW = (W - 2*M - labelColW) / 7;
   const colX = [M, M+labelColW];
-  for(let i=1;i<5;i++) colX.push(colX[colX.length-1] + dayColW);
-  colX.push(M + labelColW + dayColW*5);
- 
-  const rowH = [20, 16, 36, 16, 36, 16, 24]; // header, date, am-sign, am-name, pm-sign, pm-name, comment
-  const rowLabels = ["", "Date", "AM Sign", "AM Name", "PM Sign", "PM Name", "Comment"];
-  const tableTop = topY;
+  for(let i=1;i<7;i++) colX.push(colX[colX.length-1] + dayColW);
+  colX.push(M + labelColW + dayColW*7);
+
+  const rowH = [20, 20, 20, 18, 38, 16, 24]; // header, start, finish, hours, sign, name, comment
+  const rowLabels = ["", "Start", "Finish", "Hours", "Sign", "Name", "Comment"];
+  const tableTop = 68;
   const rowY = [tableTop];
   for(const h of rowH) rowY.push(rowY[rowY.length-1] + h);
   const tableBottom = rowY[rowY.length-1];
- 
-  function toPdfY(y){ return H - y; }
- 
-  const dates = snapshot.startDate ? weekDates(snapshot.startDate, weekIndex) : [null,null,null,null,null];
- 
-  appendFn(`BT /F2 11 Tf ${M} ${toPdfY(tableTop-6)} Td (${pdfEscape("Week " + (weekIndex+1))}) Tj ET\n`);
-  if(dates[0]){
-    const rangeText = fmtShort(dates[0]) + " - " + fmtShort(dates[4]);
-    appendFn(`BT /F1 8.5 Tf ${M+50} ${toPdfY(tableTop-6)} Td (${pdfEscape(rangeText)}) Tj ET\n`);
-  }
- 
-  appendFn("0.8 w\n");
+
+  append("0.8 w\n");
   for(const x of colX){
-    appendFn(`${x} ${toPdfY(tableTop)} m ${x} ${toPdfY(tableBottom)} l S\n`);
+    append(`${x} ${toPdfY(tableTop)} m ${x} ${toPdfY(tableBottom)} l S\n`);
   }
   for(const y of rowY){
-    appendFn(`${M} ${toPdfY(y)} m ${colX[colX.length-1]} ${toPdfY(y)} l S\n`);
+    append(`${M} ${toPdfY(y)} m ${colX[colX.length-1]} ${toPdfY(y)} l S\n`);
   }
- 
+
   for(let r=1;r<rowLabels.length;r++){
     const midTop = (rowY[r] + rowY[r+1]) / 2 + 2.8;
-    appendFn(`BT /F1 7.5 Tf ${colX[0]+5} ${toPdfY(midTop)} Td (${pdfEscape(rowLabels[r])}) Tj ET\n`);
+    append(`BT /F1 7.5 Tf ${colX[0]+5} ${toPdfY(midTop)} Td (${pdfEscape(rowLabels[r])}) Tj ET\n`);
   }
-  for(let d=0; d<5; d++){
+  for(let d=0; d<7; d++){
     const midTop = (rowY[0]+rowY[1])/2 + 2.8;
-    appendFn(`BT /F2 8.5 Tf ${colX[1+d]+5} ${toPdfY(midTop)} Td (${pdfEscape(DAY_NAMES[d])}) Tj ET\n`);
+    append(`BT /F2 8.5 Tf ${colX[1+d]+5} ${toPdfY(midTop)} Td (${pdfEscape(DAY_NAMES[d].slice(0,3))}) Tj ET\n`);
   }
- 
-  function placeName(name, cx, top, bottom){
-    if(!name) return;
+
+  function placeText(text, cx, top, bottom){
+    if(!text) return;
     const midTop = (top+bottom)/2 + 2.8;
-    appendFn(`BT /F1 7.5 Tf ${cx+5} ${toPdfY(midTop)} Td (${pdfEscape(name)}) Tj ET\n`);
+    append(`BT /F1 7.5 Tf ${cx+5} ${toPdfY(midTop)} Td (${pdfEscape(text)}) Tj ET\n`);
   }
   function placeSignature(sigDataUrl, sigW, sigH, cx, cw, top, bottom){
     if(!sigDataUrl) return;
-    const w0 = sigW || PAD_W, h0 = sigH || PAD_H; // fallback for data saved before per-image sizing existed
+    const w0 = sigW || PAD_W, h0 = sigH || PAD_H;
     const aspect = w0 / h0;
     const pad = 3;
     const boxW = cw - pad*2;
@@ -1136,7 +1195,7 @@ function drawWeekTable(snapshot, weekIndex, topY, images, appendFn, W, H, M){
     const pdfY = H - (drawTopY + h);
     const name = "Im" + (images.length+1);
     images.push({ name, jpeg: dataUrlToJpegBytes(sigDataUrl), w: w0, h: h0 });
-    appendFn(`q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${drawX.toFixed(2)} ${pdfY.toFixed(2)} cm /${name} Do Q\n`);
+    append(`q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${drawX.toFixed(2)} ${pdfY.toFixed(2)} cm /${name} Do Q\n`);
   }
   function placeComment(text, cx, cw, top, bottom){
     if(!text) return;
@@ -1146,57 +1205,35 @@ function drawWeekTable(snapshot, weekIndex, topY, images, appendFn, W, H, M){
     const blockH = lines.length * lineH;
     let startTop = (top+bottom)/2 - blockH/2 + 6;
     lines.forEach((line, i) => {
-      appendFn(`BT /F1 7 Tf ${cx+5} ${toPdfY(startTop + i*lineH)} Td (${pdfEscape(line)}) Tj ET\n`);
+      append(`BT /F1 7 Tf ${cx+5} ${toPdfY(startTop + i*lineH)} Td (${pdfEscape(line)}) Tj ET\n`);
     });
   }
- 
-  for(let d=0; d<5; d++){
-    const day = (snapshot.days && snapshot.days[dayKey(weekIndex,d)]) || blankDay();
+
+  for(let d=0; d<7; d++){
+    const entry = (snapshot.days && snapshot.days[dayKey(weekIndex,d)]) || blankDayEntry();
     const cx = colX[1+d];
     const cw = dayColW;
- 
-    if(dates[d]){
-      const midTop = (rowY[1]+rowY[2])/2 + 2.8;
-      appendFn(`BT /F1 7.5 Tf ${cx+5} ${toPdfY(midTop)} Td (${pdfEscape(fmtShort(dates[d]))}) Tj ET\n`);
-    }
- 
-    placeSignature(day.am.sig, day.am.sigW, day.am.sigH, cx, cw, rowY[2], rowY[3]);
-    placeName(day.am.name, cx, rowY[3], rowY[4]);
-    placeSignature(day.pm.sig, day.pm.sigW, day.pm.sigH, cx, cw, rowY[4], rowY[5]);
-    placeName(day.pm.name, cx, rowY[5], rowY[6]);
-    placeComment(day.comment, cx, cw, rowY[6], rowY[7]);
+    const h = dayHours(entry);
+
+    placeText(entry.start, cx, rowY[1], rowY[2]);
+    placeText(entry.finish, cx, rowY[2], rowY[3]);
+    placeText(h > 0 ? fmtHours(h) : "", cx, rowY[3], rowY[4]);
+    placeSignature(entry.sig, entry.sigW, entry.sigH, cx, cw, rowY[4], rowY[5]);
+    placeText(entry.name, cx, rowY[5], rowY[6]);
+    placeComment(entry.comment, cx, cw, rowY[6], rowY[7]);
   }
- 
-  return tableBottom;
-}
- 
-function makeBlockPage(snapshot, weekA, weekB){
-  const W = 595, H = 842, M = 40;
-  function toPdfY(y){ return H - y; }
-  let ops = "";
-  const images = [];
-  function append(s){ ops += s; }
- 
-  append(`BT /F2 17 Tf ${M} ${toPdfY(38)} Td (${pdfEscape("ATTENDANCE RECORD")}) Tj ET\n`);
-  append(`BT /F1 11 Tf ${M} ${toPdfY(58)} Td (${pdfEscape("Name: " + (snapshot.studentName || ""))}) Tj ET\n`);
- 
-  let nextTop = 95;
-  nextTop = drawWeekTable(snapshot, weekA, nextTop, images, append, W, H, M);
-  if(weekB !== null){
-    nextTop = drawWeekTable(snapshot, weekB, nextTop + 26, images, append, W, H, M);
-  }
- 
+
   return { width: W, height: H, ops, images };
 }
- 
+
 function exportSnapshot(snapshot, label){
   const n = Math.max(1, Math.min(14, parseInt(snapshot.numWeeks,10) || 1));
-  const numBlocks = Math.ceil(n/2);
   const pages = [];
-  for(let b=0; b<numBlocks; b++){
-    const weekA = b*2;
-    const weekB = (weekA+1 < n) ? weekA+1 : null;
-    pages.push(makeBlockPage(snapshot, weekA, weekB));
+  let running = 0;
+  for(let w=0; w<n; w++){
+    const weekTotal = [0,1,2,3,4,5,6].reduce((s,d) => s + dayHours((snapshot.days||{})[dayKey(w,d)] || blankDayEntry()), 0);
+    running += weekTotal;
+    pages.push(makeWeekPage(snapshot, w, running));
   }
   const bytes = buildPDF(pages);
   const blob = new Blob([bytes], { type: "application/pdf" });
@@ -1204,11 +1241,11 @@ function exportSnapshot(snapshot, label){
   const filename = `${safeName}_${(label||"record").replace(/[^a-z0-9]+/gi,"_")}.pdf`;
   return { blob, filename };
 }
- 
+
 /* ---------------------------------------------------------------------
    Import from paper: upload a photo or PDF of a paper-signed page,
    crop out one signature at a time, and drop each crop into whichever
-   day/session it belongs to. Fully client-side, no libraries.
+   day it belongs to. Fully client-side, no libraries.
 --------------------------------------------------------------------- */
 function bytesToBinaryString(bytes){
   let s = "";
@@ -1226,11 +1263,6 @@ function binaryStringToBytes(s){
 function bytesToDataURL(bytes, mime){
   return `data:${mime};base64,${btoa(bytesToBinaryString(bytes))}`;
 }
- 
-// --- Minimal PDF structure parser: finds "N 0 obj ... endobj" regions and,
-// within them, the raw byte range of any stream (located by literal
-// "stream"/"endstream" markers rather than trusting /Length, which is more
-// robust against odd generators). ---
 function parsePdfObjects(binStr){
   const objects = new Map();
   const objRe = /(\d+)\s+0\s+obj/g;
@@ -1275,8 +1307,6 @@ async function inflateBytes(bytes){
   const out = await new Response(stream).arrayBuffer();
   return new Uint8Array(out);
 }
-// Interprets decompressed/raw pixel bytes (8-bit DeviceRGB/Gray/CMYK) into
-// canvas-ready RGBA.
 function rawPixelsToRGBA(raw, width, height, colorSpace){
   const out = new Uint8ClampedArray(width*height*4);
   if(/Gray/i.test(colorSpace)){
@@ -1292,17 +1322,13 @@ function rawPixelsToRGBA(raw, width, height, colorSpace){
       out[i*4+2] = 255*(1-y)*(1-k);
       out[i*4+3] = 255;
     }
-  } else { // DeviceRGB (default/fallback)
+  } else {
     for(let i=0;i<width*height;i++){
       out[i*4]=raw[i*3]||0; out[i*4+1]=raw[i*3+1]||0; out[i*4+2]=raw[i*3+2]||0; out[i*4+3]=255;
     }
   }
   return out;
 }
- 
-// Returns [{ width, height, dataUrl }] — every extractable image found in
-// the PDF, normalised to a JPEG data URL so the rest of the app can treat
-// PDF pages and plain photos identically.
 async function extractPdfImages(fileBytes){
   const binStr = bytesToBinaryString(fileBytes);
   const objects = parsePdfObjects(binStr);
@@ -1314,12 +1340,12 @@ async function extractPdfImages(fileBytes){
     const heightStr = pdfDictGet(entry.dict, "Height");
     if(!widthStr || !heightStr) continue;
     const width = parseInt(widthStr, 10), height = parseInt(heightStr, 10);
-    if(!width || !height || width*height > 60_000_000) continue; // sanity guard
+    if(!width || !height || width*height > 60_000_000) continue;
     const bpcStr = pdfDictGet(entry.dict, "BitsPerComponent");
     const bpc = bpcStr ? parseInt(bpcStr, 10) : 8;
     const colorSpace = pdfDictGet(entry.dict, "ColorSpace") || "DeviceRGB";
     const streamBytes = binaryStringToBytes(binStr.slice(entry.streamStart, entry.streamEnd));
- 
+
     try{
       if(pdfDictHasFilter(entry.dict, "DCTDecode")){
         out.push({ width, height, dataUrl: bytesToDataURL(streamBytes, "image/jpeg") });
@@ -1331,13 +1357,10 @@ async function extractPdfImages(fileBytes){
         canvas.getContext("2d").putImageData(new ImageData(rgba, width, height), 0, 0);
         out.push({ width, height, dataUrl: canvas.toDataURL("image/jpeg", 0.92) });
       }
-      // Other filters (CCITTFax/JPX/JBIG2) are silently skipped — surfaced
-      // to the user as "no images found" if nothing else in the file works.
     }catch(e){ /* skip this image, keep trying others */ }
   }
   return out;
 }
- 
 function loadImageFile(file){
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
@@ -1347,9 +1370,9 @@ function loadImageFile(file){
     img.src = url;
   });
 }
- 
-const importState = { candidates: [], sourceCanvas: null, scale: 1 };
- 
+
+const importState = { candidates: [], sourceCanvas: null };
+
 function importPopulateWeekSelect(){
   const sel = document.getElementById("importWeekSelect");
   const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
@@ -1360,7 +1383,6 @@ function importPopulateWeekSelect(){
     sel.appendChild(opt);
   }
 }
- 
 function importReset(){
   document.getElementById("importFileInput").value = "";
   document.getElementById("importStatus").textContent = "";
@@ -1372,7 +1394,6 @@ function importReset(){
   importState.candidates = [];
   importState.sourceCanvas = null;
 }
- 
 document.getElementById("importOpenBtn").addEventListener("click", () => {
   importReset();
   importPopulateWeekSelect();
@@ -1380,11 +1401,8 @@ document.getElementById("importOpenBtn").addEventListener("click", () => {
 });
 document.getElementById("importCloseBtn").addEventListener("click", () => {
   document.getElementById("importOverlay").classList.remove("show");
-  if(importState.candidates.some(c => c.objectUrl)){
-    importState.candidates.forEach(c => c.objectUrl && URL.revokeObjectURL(c.objectUrl));
-  }
+  importState.candidates.forEach(c => c.objectUrl && URL.revokeObjectURL(c.objectUrl));
 });
- 
 document.getElementById("importFileInput").addEventListener("change", async (e) => {
   const file = e.target.files[0];
   if(!file) return;
@@ -1402,8 +1420,7 @@ document.getElementById("importFileInput").addEventListener("change", async (e) 
         return;
       }
     } else if(file.type.startsWith("image/") || /\.(heic|heif|jpg|jpeg|png|webp)$/i.test(file.name)){
-      const loaded = await loadImageFile(file);
-      candidates = [loaded];
+      candidates = [await loadImageFile(file)];
     } else {
       statusEl.className = "import-status error";
       statusEl.textContent = "That file type isn't supported — please use a photo (JPG/PNG/HEIC) or a PDF.";
@@ -1421,14 +1438,13 @@ document.getElementById("importFileInput").addEventListener("change", async (e) 
     statusEl.textContent = "Couldn't read that file: " + err.message;
   }
 });
- 
 function showImportPicker(candidates){
   document.getElementById("importStep1").style.display = "none";
   const picker = document.getElementById("importPicker");
   picker.style.display = "block";
   const list = document.getElementById("importPickerList");
   list.innerHTML = "";
-  candidates.forEach((c, i) => {
+  candidates.forEach((c) => {
     const item = document.createElement("div");
     item.className = "import-picker-item";
     item.innerHTML = `<img src="${c.dataUrl}"><div class="cap">${c.width}×${c.height}</div>`;
@@ -1439,26 +1455,22 @@ function showImportPicker(candidates){
     list.appendChild(item);
   });
 }
- 
 async function openImportWorkspace(candidate){
   document.getElementById("importStep1").style.display = "none";
   document.getElementById("importPicker").style.display = "none";
   document.getElementById("importWorkspace").style.display = "block";
- 
+
   const canvas = document.getElementById("importCanvas");
   const ctx = canvas.getContext("2d");
-  let srcW, srcH;
   if(candidate.imgEl){
-    srcW = candidate.width; srcH = candidate.height;
-    canvas.width = srcW; canvas.height = srcH;
+    canvas.width = candidate.width; canvas.height = candidate.height;
     ctx.drawImage(candidate.imgEl, 0, 0);
     if(candidate.objectUrl) URL.revokeObjectURL(candidate.objectUrl);
   } else {
     await new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        srcW = img.naturalWidth; srcH = img.naturalHeight;
-        canvas.width = srcW; canvas.height = srcH;
+        canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
         ctx.drawImage(img, 0, 0);
         resolve();
       };
@@ -1466,26 +1478,16 @@ async function openImportWorkspace(candidate){
     });
   }
   importState.sourceCanvas = canvas;
- 
   importPopulateWeekSelect();
   setupCropper(canvas);
 }
- 
-/* --- Cropper: a draggable/resizable rectangle over the uploaded image.
-   Coordinates are tracked in canvas PIXEL space; the overlay div is
-   positioned in CSS-pixel space via a scale factor from the rendered
-   size, the same pattern used for the signature pad. --- */
 function setupCropper(canvas){
   const wrap = document.getElementById("importCanvasWrap");
   const rectEl = document.getElementById("cropRect");
   const W = canvas.width, H = canvas.height;
- 
   let rect = { x: W*0.1, y: H*0.1, w: W*0.5, h: H*0.2 };
- 
-  function scaleFactor(){
-    const cssW = canvas.getBoundingClientRect().width || 1;
-    return cssW / W;
-  }
+
+  function scaleFactor(){ return (canvas.getBoundingClientRect().width || 1) / W; }
   function draw(){
     const s = scaleFactor();
     rectEl.style.left = (rect.x*s) + "px";
@@ -1501,7 +1503,7 @@ function setupCropper(canvas){
   }
   clamp(); draw();
   window.addEventListener("resize", draw);
- 
+
   let mode = null, startPt = null, startRect = null;
   function toCanvasPt(evt){
     const r = wrap.getBoundingClientRect();
@@ -1513,7 +1515,7 @@ function setupCropper(canvas){
     mode = m;
     startPt = toCanvasPt(evt);
     startRect = { ...rect };
-    (evt.target).setPointerCapture && evt.target.setPointerCapture(evt.pointerId);
+    evt.target.setPointerCapture && evt.target.setPointerCapture(evt.pointerId);
   }
   function onMove(evt){
     if(!mode) return;
@@ -1537,9 +1539,9 @@ function setupCropper(canvas){
     clamp(); draw();
   }
   function onUp(){ mode = null; }
- 
+
   rectEl.addEventListener("pointerdown", (e) => {
-    if(e.target.classList.contains("crop-handle")) return; // handled separately below
+    if(e.target.classList.contains("crop-handle")) return;
     onDown(e, "move");
   });
   rectEl.querySelectorAll(".crop-handle").forEach(h => {
@@ -1548,10 +1550,9 @@ function setupCropper(canvas){
   wrap.addEventListener("pointermove", onMove);
   wrap.addEventListener("pointerup", onUp);
   wrap.addEventListener("pointercancel", onUp);
- 
+
   importState.getCropPixels = () => ({ ...rect });
 }
- 
 document.getElementById("importAssignBtn").addEventListener("click", () => {
   if(!importState.sourceCanvas || !importState.getCropPixels) return;
   const r = importState.getCropPixels();
@@ -1564,27 +1565,24 @@ document.getElementById("importAssignBtn").addEventListener("click", () => {
     0, 0, cw, ch
   );
   const dataUrl = cropCanvas.toDataURL("image/jpeg", 0.88);
- 
+
   const w = parseInt(document.getElementById("importWeekSelect").value, 10);
   const d = parseInt(document.getElementById("importDaySelect").value, 10);
-  const slot = document.getElementById("importSessionSelect").value;
- 
-  const day = getDay(w, d);
-  const sess = day[slot];
-  sess.sig = dataUrl; sess.sigW = cw; sess.sigH = ch; sess.imported = true;
+
+  const entry = getDay(w, d);
+  entry.sig = dataUrl; entry.sigW = cw; entry.sigH = ch; entry.imported = true;
   scheduleSave();
- 
+
   const log = document.getElementById("importLog");
-  const entry = document.createElement("div");
-  entry.className = "import-log-item";
-  entry.innerHTML = `<span>Week ${w+1}, ${DAY_NAMES[d]} ${slot.toUpperCase()} ✓</span>`;
-  log.prepend(entry);
- 
-  // If the affected week is currently open, refresh it in place so the
-  // change is visible without losing the import overlay.
+  const logEntry = document.createElement("div");
+  logEntry.className = "import-log-item";
+  logEntry.innerHTML = `<span>Week ${w+1}, ${DAY_NAMES[d]} ✓</span>`;
+  log.prepend(logEntry);
+
   renderWeeks();
+  updateProgress();
 });
- 
+
 /* ---------------------------------------------------------------------
    Export / Share actions
 --------------------------------------------------------------------- */
@@ -1597,13 +1595,13 @@ function downloadBlob(blob, filename){
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
- 
+
 document.getElementById("exportBtn").addEventListener("click", () => {
   const { blob, filename } = exportSnapshot(state.current, "current");
   downloadBlob(blob, filename);
   showToast("PDF ready — use the Files share sheet to keep it in iCloud Drive");
 });
- 
+
 document.getElementById("shareBtn").addEventListener("click", async () => {
   const { blob, filename } = exportSnapshot(state.current, "current");
   const file = new File([blob], filename, { type: "application/pdf" });
@@ -1619,7 +1617,6 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
       if(err && err.name !== "AbortError") showToast("Share cancelled");
     }
   } else {
-    // Fallback: download the PDF, then open a pre-filled email (attach manually)
     downloadBlob(blob, filename);
     const subject = encodeURIComponent("Attendance record — " + (state.current.studentName || ""));
     const body = encodeURIComponent(
@@ -1629,12 +1626,12 @@ document.getElementById("shareBtn").addEventListener("click", async () => {
     showToast("PDF downloaded — attach it to the email that just opened");
   }
 });
- 
+
 document.getElementById("saveNowBtn").addEventListener("click", async () => {
   const ok = await saveState(state);
   showToast(ok ? "Saved to this device" : "Save failed — try again");
 });
- 
+
 /* ---------------------------------------------------------------------
    Boot
 --------------------------------------------------------------------- */
@@ -1644,21 +1641,42 @@ document.getElementById("saveNowBtn").addEventListener("click", async () => {
     state = saved;
     if(!state.current) state.current = blankCurrent();
     if(!state.archive) state.archive = [];
-    if(state.current.openBlock === undefined) state.current.openBlock = 0;
+    if(state.current.openWeek === undefined) state.current.openWeek = 0;
+
+    // Migration: data saved under the old AM/PM, 5-day-week schema gets
+    // archived as-is (so nothing is lost) rather than silently mangled
+    // into the new hours-based shape.
+    if(state.current.schemaVersion !== SCHEMA_VERSION){
+      const hasOldData = Object.keys(state.current.days || {}).length > 0 ||
+                          !!state.current.studentName;
+      if(hasOldData){
+        state.archive.push({
+          id: Date.now().toString(36),
+          label: "Previous format (auto-archived on update)",
+          savedAt: new Date().toISOString(),
+          schemaVersion: state.current.schemaVersion || 1,
+          snapshot: state.current
+        });
+      }
+      const keepName = state.current.studentName;
+      state.current = blankCurrent();
+      state.current.studentName = keepName || "";
+      await saveState(state);
+    }
   } else {
-    // Sensible defaults for this rotation block
     const today = new Date();
     const monday = new Date(today);
     const dow = monday.getDay();
     const diff = (dow === 0 ? -6 : 1) - dow;
     monday.setDate(monday.getDate() + diff);
     state.current.startDate = toIsoLocal(monday);
-    state.current.numWeeks = 7;
-    state.current.openBlock = 0;
+    state.current.numWeeks = 3;
+    state.current.targetHours = 76;
+    state.current.openWeek = 0;
   }
   render();
 })();
- 
+
 })();
 </script>
 </body>
