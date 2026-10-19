@@ -88,6 +88,11 @@
     padding:4px 8px; border-radius:7px;
   }
 
+  .seg{display:grid; grid-template-columns:1fr 1fr; gap:6px; background:var(--accent-soft); padding:4px; border-radius:11px; margin-bottom:14px;}
+  .seg button{border:none; background:transparent; padding:10px; border-radius:8px; font-size:13.5px; font-weight:600; color:var(--accent-ink); font-family:var(--sans);}
+  .seg button.on{background:var(--accent); color:#fff;}
+  .session-label{font-family:var(--mono); font-size:10px; letter-spacing:0.1em; color:var(--muted); text-transform:uppercase; margin:4px 0 6px;}
+
   .weeks{margin-top:4px;}
   .week{
     border:1px solid var(--line); border-radius:var(--radius); background:var(--card);
@@ -271,7 +276,7 @@
 
 <div class="wrap">
 
-  <div class="card ring-card">
+  <div class="card ring-card" id="ringCard">
     <div class="ring-wrap">
       <svg viewBox="0 0 120 120">
         <circle cx="60" cy="60" r="52" fill="none" stroke="#E4F1EE" stroke-width="12"></circle>
@@ -290,14 +295,25 @@
     </div>
   </div>
 
+  <div class="card" id="sessionsCard" style="display:none;">
+    <h2>Signatures</h2>
+    <div class="ring-hours" id="sessionsCount">0 of 0 sessions signed</div>
+    <div class="ring-sub" style="margin-bottom:0;">AM 8:00 – 12:30 · PM 1:00 – 5:00, Monday to Friday</div>
+  </div>
+
   <div class="card">
     <h2>Rotation details</h2>
     <p class="sub">Set this once per rotation. Dates for every week fill in automatically.</p>
+    <span class="field-label">Rotation</span>
+    <div class="seg" id="typeSeg">
+      <button data-type="ED">ED</button>
+      <button data-type="ANAES">Anaesthetics</button>
+    </div>
     <label class="field">
       <span class="field-label">Student name</span>
       <input type="text" id="studentName" placeholder="Full name" autocomplete="name">
     </label>
-    <div class="row3">
+    <div class="row3" id="row3">
       <label class="field" style="margin-bottom:0;">
         <span class="field-label">Monday of week 1</span>
         <input type="date" id="startDate">
@@ -306,7 +322,7 @@
         <span class="field-label">Weeks</span>
         <input type="number" id="numWeeks" min="1" max="14" value="3">
       </label>
-      <label class="field" style="margin-bottom:0;">
+      <label class="field" id="targetField" style="margin-bottom:0;">
         <span class="field-label">Target hrs</span>
         <input type="number" id="targetHours" min="1" max="500" value="76">
       </label>
@@ -400,6 +416,13 @@
             <option value="4">Friday</option>
             <option value="5">Saturday</option>
             <option value="6">Sunday</option>
+          </select>
+        </label>
+        <label class="field" id="importSessionField" style="margin-bottom:0; display:none; grid-column:1 / -1;">
+          <span class="field-label">Session</span>
+          <select id="importSessionSelect">
+            <option value="am">AM (8:00 – 12:30)</option>
+            <option value="pm">PM (1:00 – 5:00)</option>
           </select>
         </label>
       </div>
@@ -504,15 +527,25 @@ function fmtHours(h){
    State
 --------------------------------------------------------------------- */
 function blankDayEntry(){ return { start:"", finish:"", sig:null, sigW:null, sigH:null, imported:false, name:"", comment:"" }; }
-function blankCurrent(){
+function blankSess(){ return { name:"", sig:null, sigW:null, sigH:null, imported:false }; }
+function blankAnaesDay(){ return { am: blankSess(), pm: blankSess(), comment:"" }; }
+function curType(){ return state.current.type === "ANAES" ? "ANAES" : "ED"; }
+function numDaysFor(type){ return type === "ANAES" ? 5 : 7; }
+function currentHasData(){
+  return Object.values(state.current.days).some(e => curType()==="ANAES"
+    ? (e.am.sig || e.am.name || e.pm.sig || e.pm.name || e.comment)
+    : (e.sig || e.name || e.start || e.finish));
+}
+function blankCurrent(type){
   return {
     schemaVersion: SCHEMA_VERSION,
+    type: type === "ANAES" ? "ANAES" : "ED",
     studentName:"",
     startDate:"",
     numWeeks:3,
     targetHours:76,
     openWeek:0,
-    days:{} // key "w{week}-d{day}" (d: 0=Mon..6=Sun) -> blankDayEntry()
+    days:{} // key "w{week}-d{day}" -> ED: start/finish entry (d 0=Mon..6=Sun); Anaesthetics: {am, pm, comment} (d 0..4)
   };
 }
 let state = {
@@ -523,7 +556,7 @@ let state = {
 function dayKey(w,d){ return "w"+w+"-d"+d; }
 function getDay(w,d){
   const k = dayKey(w,d);
-  if(!state.current.days[k]) state.current.days[k] = blankDayEntry();
+  if(!state.current.days[k]) state.current.days[k] = curType()==="ANAES" ? blankAnaesDay() : blankDayEntry();
   return state.current.days[k];
 }
 
@@ -627,6 +660,7 @@ function renderWeeks(){
   weeksContainer.innerHTML = "";
   const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
   const start = state.current.startDate;
+  const nd = numDaysFor(curType());
 
   for(let w=0; w<n; w++){
     const dates = start ? weekDates(start, w) : new Array(7).fill(null);
@@ -635,7 +669,7 @@ function renderWeeks(){
 
     const head = document.createElement("div");
     head.className = "week-head";
-    const rangeLabel = start ? (fmtShort(dates[0]) + " – " + fmtShort(dates[6])) : "Set a start date above";
+    const rangeLabel = start ? (fmtShort(dates[0]) + " – " + fmtShort(dates[nd-1])) : "Set a start date above";
     head.innerHTML = `
       <div>
         <div class="week-title">Week ${w+1}</div>
@@ -653,7 +687,7 @@ function renderWeeks(){
     const body = document.createElement("div");
     body.className = "week-body";
     if(state.current.openWeek === w){
-      for(let d=0; d<7; d++) body.appendChild(renderDayCard(w, d, dates[d]));
+      for(let d=0; d<nd; d++) body.appendChild(renderDayCard(w, d, dates[d]));
     }
 
     weekEl.appendChild(head);
@@ -663,7 +697,34 @@ function renderWeeks(){
   refreshWeekCounts();
 }
 
+function renderAnaesDayCard(w, d, iso){
+  const entry = getDay(w,d);
+  const card = document.createElement("div");
+  card.className = "day";
+  card.innerHTML = `
+    <div class="day-head">
+      <span class="day-name">${DAY_NAMES[d]}</span>
+      <span class="day-date">${iso ? fmtLong(iso).split(",").slice(1).join(",").trim() : "—"}</span>
+    </div>
+    <div class="session-label">AM · 8:00 – 12:30</div>
+    <div class="session" data-session="am"></div>
+    <div class="session-label">PM · 1:00 – 5:00</div>
+    <div class="session" data-session="pm"></div>
+    <div class="comment-row">
+      <input class="comment-input" type="text" placeholder="Comment — e.g. sick leave, public holiday, left early" value="${escapeAttr(entry.comment)}" data-comment-input>
+    </div>
+  `;
+  card.querySelector("[data-comment-input]").addEventListener("input", (e) => {
+    entry.comment = e.target.value;
+    scheduleSave();
+  });
+  buildSessionUI(card.querySelector('[data-session="am"]'), entry.am, w, d);
+  buildSessionUI(card.querySelector('[data-session="pm"]'), entry.pm, w, d);
+  return card;
+}
+
 function renderDayCard(w, d, iso){
+  if(curType() === "ANAES") return renderAnaesDayCard(w, d, iso);
   const entry = getDay(w,d);
   const card = document.createElement("div");
   card.className = "day" + (d>=5 ? " weekend" : "");
@@ -802,16 +863,47 @@ function rotationTotalHours(){
   return total;
 }
 
+function weekSigned(w){
+  let c = 0;
+  for(let d=0; d<5; d++){
+    const e = getDay(w,d);
+    if(e.am.sig) c++;
+    if(e.pm.sig) c++;
+  }
+  return c;
+}
 function refreshWeekCounts(){
   const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
+  const anaes = curType() === "ANAES";
   for(let w=0; w<n; w++){
     const el = weeksContainer.querySelector(`[data-count-week="${w}"]`);
-    if(el) el.textContent = fmtHours(weekTotalHours(w)) + " hrs";
+    if(el) el.textContent = anaes ? (weekSigned(w) + "/10 signed") : (fmtHours(weekTotalHours(w)) + " hrs");
   }
 }
 
 const RING_CIRC = 2 * Math.PI * 52;
 function updateProgress(){
+  const anaes = curType() === "ANAES";
+  document.getElementById("ringCard").style.display = anaes ? "none" : "";
+  document.getElementById("sessionsCard").style.display = anaes ? "block" : "none";
+  document.getElementById("targetField").style.display = anaes ? "none" : "";
+  document.getElementById("row3").style.gridTemplateColumns = anaes ? "1fr 90px" : "";
+  document.getElementById("importSessionField").style.display = anaes ? "block" : "none";
+  document.getElementById("termLabel").textContent = anaes ? "Anaesthetics rotation" : "ED rotation";
+  document.querySelectorAll("#typeSeg button").forEach(b => b.classList.toggle("on", b.getAttribute("data-type") === curType()));
+  const daySel = document.getElementById("importDaySelect");
+  Array.from(daySel.options).forEach((o, i) => { o.disabled = anaes && i >= 5; });
+  if(anaes && parseInt(daySel.value,10) >= 5) daySel.value = "0";
+
+  const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
+  if(anaes){
+    let signed = 0;
+    for(let w=0; w<n; w++) signed += weekSigned(w);
+    document.getElementById("sessionsCount").textContent = `${signed} of ${n*10} sessions signed`;
+    refreshWeekCounts();
+    return;
+  }
+
   const target = Math.max(1, parseFloat(state.current.targetHours) || 76);
   const total = rotationTotalHours();
   const pct = total / target;
@@ -827,7 +919,6 @@ function updateProgress(){
     ? `${fmtHours(remaining)} hrs left`
     : `Target reached — ${fmtHours(Math.abs(remaining))} hrs over`;
 
-  const n = Math.max(1, Math.min(14, parseInt(state.current.numWeeks,10) || 1));
   const weeksEl = document.getElementById("ringWeeks");
   weeksEl.innerHTML = "";
   for(let w=0; w<n; w++){
@@ -951,11 +1042,7 @@ function promptModal(title, body, defaultValue){
    New rotation / archive
 --------------------------------------------------------------------- */
 document.getElementById("newTermBtn").addEventListener("click", async () => {
-  const hasData = Object.keys(state.current.days).some(k => {
-    const e = state.current.days[k];
-    return e.sig || e.name || e.start || e.finish;
-  });
-  if(!hasData){
+  if(!currentHasData()){
     showToast("Nothing to archive yet");
     return;
   }
@@ -979,11 +1066,41 @@ document.getElementById("newTermBtn").addEventListener("click", async () => {
   };
   state.archive.push(entry);
   const keepName = state.current.studentName;
-  state.current = blankCurrent();
+  const keepType = curType();
+  state.current = blankCurrent(keepType);
   state.current.studentName = keepName;
   await saveState(state);
   render();
   showToast("Rotation archived");
+});
+
+document.getElementById("typeSeg").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-type]");
+  if(!btn) return;
+  const t = btn.getAttribute("data-type");
+  if(t === curType()) return;
+  const niceName = (x) => x === "ANAES" ? "Anaesthetics" : "ED";
+  if(currentHasData()){
+    const ok = await confirmModal(
+      "Switch to " + niceName(t) + "?",
+      "Your current " + niceName(curType()) + " record will be archived under Past Rotations (still exportable) and a fresh " + niceName(t) + " record will start."
+    );
+    if(!ok) return;
+    state.archive.push({
+      id: Date.now().toString(36),
+      label: niceName(curType()) + " (archived when switching rotation)",
+      savedAt: new Date().toISOString(),
+      schemaVersion: SCHEMA_VERSION,
+      snapshot: JSON.parse(JSON.stringify(state.current))
+    });
+  }
+  const keep = { studentName: state.current.studentName, startDate: state.current.startDate, numWeeks: state.current.numWeeks };
+  state.current = blankCurrent(t);
+  state.current.studentName = keep.studentName;
+  state.current.startDate = keep.startDate;
+  if(t === "ANAES") state.current.numWeeks = keep.numWeeks || 3;
+  await saveState(state);
+  render();
 });
 
 /* ---------------------------------------------------------------------
@@ -1226,14 +1343,115 @@ function makeWeekPage(snapshot, weekIndex, rotationTotalsUpToWeek){
   return { width: W, height: H, ops, images };
 }
 
+function makeAnaesWeekPage(snapshot, weekIndex){
+  const W = 842, H = 595, M = 36;
+  function toPdfY(y){ return H - y; }
+  let ops = "";
+  const images = [];
+  function append(s){ ops += s; }
+
+  const dates = snapshot.startDate ? weekDates(snapshot.startDate, weekIndex) : new Array(7).fill(null);
+
+  append(`BT /F2 16 Tf ${M} ${toPdfY(32)} Td (${pdfEscape("ATTENDANCE RECORD - ANAESTHETICS")}) Tj ET\n`);
+  append(`BT /F1 10 Tf ${M} ${toPdfY(50)} Td (${pdfEscape("Name: " + (snapshot.studentName || ""))}) Tj ET\n`);
+  append(`BT /F2 11 Tf ${M+220} ${toPdfY(50)} Td (${pdfEscape("Week " + (weekIndex+1))}) Tj ET\n`);
+  if(dates[0]){
+    append(`BT /F1 9 Tf ${M+270} ${toPdfY(50)} Td (${pdfEscape(fmtShort(dates[0]) + " - " + fmtShort(dates[4]))}) Tj ET\n`);
+  }
+  append(`BT /F1 9 Tf ${M+420} ${toPdfY(50)} Td (${pdfEscape("AM 8:00-12:30   |   PM 1:00-5:00")}) Tj ET\n`);
+
+  const labelColW = 62;
+  const dayColW = (W - 2*M - labelColW) / 5;
+  const colX = [M, M+labelColW];
+  for(let i=1;i<5;i++) colX.push(colX[colX.length-1] + dayColW);
+  colX.push(M + labelColW + dayColW*5);
+
+  const rowH = [20, 18, 44, 18, 44, 18, 26]; // header, date, am sign, am name, pm sign, pm name, comment
+  const rowLabels = ["", "Date", "AM Sign", "AM Name", "PM Sign", "PM Name", "Comment"];
+  const tableTop = 68;
+  const rowY = [tableTop];
+  for(const h of rowH) rowY.push(rowY[rowY.length-1] + h);
+  const tableBottom = rowY[rowY.length-1];
+
+  append("0.8 w\n");
+  for(const x of colX) append(`${x} ${toPdfY(tableTop)} m ${x} ${toPdfY(tableBottom)} l S\n`);
+  for(const y of rowY) append(`${M} ${toPdfY(y)} m ${colX[colX.length-1]} ${toPdfY(y)} l S\n`);
+
+  for(let r=1;r<rowLabels.length;r++){
+    const midTop = (rowY[r] + rowY[r+1]) / 2 + 2.8;
+    append(`BT /F1 7.5 Tf ${colX[0]+5} ${toPdfY(midTop)} Td (${pdfEscape(rowLabels[r])}) Tj ET\n`);
+  }
+  for(let d=0; d<5; d++){
+    const midTop = (rowY[0]+rowY[1])/2 + 2.8;
+    append(`BT /F2 8.5 Tf ${colX[1+d]+5} ${toPdfY(midTop)} Td (${pdfEscape(DAY_NAMES[d])}) Tj ET\n`);
+  }
+
+  function placeText(text, cx, top, bottom){
+    if(!text) return;
+    const midTop = (top+bottom)/2 + 2.8;
+    append(`BT /F1 7.5 Tf ${cx+5} ${toPdfY(midTop)} Td (${pdfEscape(text)}) Tj ET\n`);
+  }
+  function placeSignature(sigDataUrl, sigW, sigH, cx, cw, top, bottom){
+    if(!sigDataUrl) return;
+    const w0 = sigW || PAD_W, h0 = sigH || PAD_H;
+    const aspect = w0 / h0;
+    const pad = 3;
+    const boxW = cw - pad*2;
+    const boxH = (bottom-top) - pad*2;
+    let w = boxW, h = w / aspect;
+    if(h > boxH){ h = boxH; w = h * aspect; }
+    const offsetX = (boxW - w)/2;
+    const offsetY = (boxH - h)/2;
+    const drawTopY = top + pad + offsetY;
+    const drawX = cx + pad + offsetX;
+    const pdfY = H - (drawTopY + h);
+    const name = "Im" + (images.length+1);
+    images.push({ name, jpeg: dataUrlToJpegBytes(sigDataUrl), w: w0, h: h0 });
+    append(`q ${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${drawX.toFixed(2)} ${pdfY.toFixed(2)} cm /${name} Do Q\n`);
+  }
+  function placeComment(text, cx, cw, top, bottom){
+    if(!text) return;
+    const maxChars = Math.max(6, Math.floor((cw-8) / 3.3));
+    const lines = wrapText(text, maxChars, 2);
+    const lineH = 8.5;
+    const blockH = lines.length * lineH;
+    let startTop = (top+bottom)/2 - blockH/2 + 6;
+    lines.forEach((line, i) => {
+      append(`BT /F1 7 Tf ${cx+5} ${toPdfY(startTop + i*lineH)} Td (${pdfEscape(line)}) Tj ET\n`);
+    });
+  }
+
+  for(let d=0; d<5; d++){
+    const entry = (snapshot.days && snapshot.days[dayKey(weekIndex,d)]) || blankAnaesDay();
+    const am = entry.am || blankSess(), pm = entry.pm || blankSess();
+    const cx = colX[1+d];
+    const cw = dayColW;
+    if(dates[d]) placeText(fmtShort(dates[d]), cx, rowY[1], rowY[2]);
+    placeSignature(am.sig, am.sigW, am.sigH, cx, cw, rowY[2], rowY[3]);
+    placeText(am.name, cx, rowY[3], rowY[4]);
+    placeSignature(pm.sig, pm.sigW, pm.sigH, cx, cw, rowY[4], rowY[5]);
+    placeText(pm.name, cx, rowY[5], rowY[6]);
+    placeComment(entry.comment, cx, cw, rowY[6], rowY[7]);
+  }
+
+  return { width: W, height: H, ops, images };
+}
+
 function exportSnapshot(snapshot, label){
+  // Anaesthetics records, and rotations archived from the very first (AM/PM,
+  // 5-day) version of this app, share the same AM/PM data shape.
+  const anaes = snapshot.type === "ANAES" || (!snapshot.type && (snapshot.schemaVersion || 1) < 2);
   const n = Math.max(1, Math.min(14, parseInt(snapshot.numWeeks,10) || 1));
   const pages = [];
   let running = 0;
   for(let w=0; w<n; w++){
-    const weekTotal = [0,1,2,3,4,5,6].reduce((s,d) => s + dayHours((snapshot.days||{})[dayKey(w,d)] || blankDayEntry()), 0);
-    running += weekTotal;
-    pages.push(makeWeekPage(snapshot, w, running));
+    if(anaes){
+      pages.push(makeAnaesWeekPage(snapshot, w));
+    } else {
+      const weekTotal = [0,1,2,3,4,5,6].reduce((s,d) => s + dayHours((snapshot.days||{})[dayKey(w,d)] || blankDayEntry()), 0);
+      running += weekTotal;
+      pages.push(makeWeekPage(snapshot, w, running));
+    }
   }
   const bytes = buildPDF(pages);
   const blob = new Blob([bytes], { type: "application/pdf" });
@@ -1569,14 +1787,20 @@ document.getElementById("importAssignBtn").addEventListener("click", () => {
   const w = parseInt(document.getElementById("importWeekSelect").value, 10);
   const d = parseInt(document.getElementById("importDaySelect").value, 10);
 
-  const entry = getDay(w, d);
+  let entry = getDay(w, d);
+  let where = `Week ${w+1}, ${DAY_NAMES[d]}`;
+  if(curType() === "ANAES"){
+    const slot = document.getElementById("importSessionSelect").value;
+    entry = entry[slot];
+    where += " " + slot.toUpperCase();
+  }
   entry.sig = dataUrl; entry.sigW = cw; entry.sigH = ch; entry.imported = true;
   scheduleSave();
 
   const log = document.getElementById("importLog");
   const logEntry = document.createElement("div");
   logEntry.className = "import-log-item";
-  logEntry.innerHTML = `<span>Week ${w+1}, ${DAY_NAMES[d]} ✓</span>`;
+  logEntry.innerHTML = `<span>${where} ✓</span>`;
   log.prepend(logEntry);
 
   renderWeeks();
@@ -1642,6 +1866,7 @@ document.getElementById("saveNowBtn").addEventListener("click", async () => {
     if(!state.current) state.current = blankCurrent();
     if(!state.archive) state.archive = [];
     if(state.current.openWeek === undefined) state.current.openWeek = 0;
+    if(!state.current.type) state.current.type = "ED"; // everything saved so far was ED-style
 
     // Migration: data saved under the old AM/PM, 5-day-week schema gets
     // archived as-is (so nothing is lost) rather than silently mangled
